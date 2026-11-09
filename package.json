@@ -1,0 +1,17 @@
+{
+  "name": "kiosco-del-recreo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Sistema de gestion de kiosco escolar con pedidos por recreo (frontend + API + backend + SQLite)",
+  "type": "module",
+  "scripts": {
+    "start": "bun run src/server.js",
+    "dev": "bun --watch run src/server.js",
+    "seed": "bun run src/db/seed.js",
+    "reset": "bun run src/db/seed.js --force",
+    "test": "bun test"
+  },
+  "engines": {
+    "bun": ">=1.2"
+  }
+}

@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#146c5f" />
+    <meta name="description" content="Kiosco del Recreo: consultá productos, reservá tu pedido para el recreo y seguí su estado." />
+    <title>Kiosco del Recreo</title>
+    <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="./css/styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header id="topbar" class="topbar"></header>
+      <main id="view" class="view" tabindex="-1">
+        <div class="boot-screen">
+          <span class="spinner"></span>
+          <p>Cargando kiosco...</p>
+        </div>
+      </main>
+    </div>
+
+    <div id="drawer-root"></div>
+    <div id="modal-root"></div>
+    <div id="toast-root" class="toast-root" aria-live="polite"></div>
+
+    <noscript>
+      <div class="noscript">Necesitás activar JavaScript para usar el kiosco.</div>
+    </noscript>
+
+    <!-- Red de seguridad del arranque -->
+    <script src="./js/boot-guard.js"></script>
+
+    <!-- Bundle listo para navegador (funciona tanto con doble clic en index.html como con servidor Bun) -->
+    <script src="./js/app.bundle.js"></script>
+  </body>
+</html>
