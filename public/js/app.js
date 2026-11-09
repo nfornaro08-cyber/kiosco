@@ -295,7 +295,7 @@ const app = {
     if (this.state.catalogError) {
       view.innerHTML = `
         <div class="error-block">
-          <span class="empty-icon">⚠️</span>
+          <span class="empty-icon"></span>
           <h3>No pudimos cargar el catálogo</h3>
           <p>${escapeHtml(this.state.catalogError)}</p>
           <button type="button" class="btn btn-primary" data-action="reload-catalog">Reintentar</button>
@@ -340,7 +340,7 @@ const app = {
     topbar.innerHTML = `
       <div class="topbar-inner">
         <a class="brand" href="#/catalogo">
-          <span class="brand-mark">🥪</span>
+          <span class="brand-mark"></span>
           <span class="brand-text">
             <strong>Kiosco del Recreo</strong>
             <small>Pedidos y stock</small>
@@ -365,7 +365,7 @@ const app = {
             route.name === 'admin'
               ? ''
               : `<button type="button" class="cart-btn" data-action="open-cart" aria-label="Abrir mi pedido">
-                   <span aria-hidden="true">🛒</span>
+                   <span aria-hidden="true"></span>
                    <span class="cart-label">Mi pedido</span>
                    <span class="cart-count" data-cart-count>${this.cartCount()}</span>
                  </button>`
@@ -377,8 +377,8 @@ const app = {
               <small>${user.role === 'admin' ? 'Administración' : 'Alumno'}</small>
             </span>
           </div>
-          <button type="button" class="icon-btn" data-action="change-password" title="Cambiar contraseña" aria-label="Cambiar contraseña">🔑</button>
-          <button type="button" class="icon-btn logout-btn" data-action="logout" title="Cerrar sesión" aria-label="Cerrar sesión">⏻</button>
+          <button type="button" class="icon-btn" data-action="change-password" title="Cambiar contraseña" aria-label="Cambiar contraseña"></button>
+          <button type="button" class="icon-btn logout-btn" data-action="logout" title="Cerrar sesión" aria-label="Cerrar sesión"></button>
         </div>
       </div>
     `;
@@ -503,7 +503,7 @@ const app = {
             const overStock = line.quantity > line.product.stock;
             return `
               <div class="cart-line ${overStock ? 'is-warning' : ''}">
-                <span class="cart-line-emoji" aria-hidden="true">${escapeHtml(line.product.emoji || '🛒')}</span>
+                <span class="cart-line-emoji" aria-hidden="true">${escapeHtml(line.product.emoji || '')}</span>
                 <div class="cart-line-info">
                   <strong>${escapeHtml(line.product.name)}</strong>
                   <small>${money(line.product.priceCents)} c/u${overStock ? ' · stock insuficiente' : ''}</small>
@@ -514,13 +514,13 @@ const app = {
                   <button type="button" class="qty-btn" data-action="cart-inc" data-id="${line.productId}" aria-label="Agregar una unidad" ${line.quantity >= line.product.stock ? 'disabled' : ''}>+</button>
                 </div>
                 <span class="cart-line-total">${money(line.product.priceCents * line.quantity)}</span>
-                <button type="button" class="icon-btn icon-btn-sm cart-remove" data-action="cart-remove" data-id="${line.productId}" aria-label="Quitar ${escapeHtml(line.product.name)}">✕</button>
+                <button type="button" class="icon-btn icon-btn-sm cart-remove" data-action="cart-remove" data-id="${line.productId}" aria-label="Quitar ${escapeHtml(line.product.name)}"></button>
               </div>
             `;
           })
           .join('')
       : emptyState({
-          icon: '🛒',
+          icon: '',
           title: 'Tu carrito está vacío',
           text: 'Sumá productos desde el catálogo.',
           action: '<button type="button" class="btn btn-primary btn-sm" data-action="close-cart">Ver catálogo</button>',
@@ -534,7 +534,7 @@ const app = {
             <p class="eyebrow">Tu pedido</p>
             <h2>Carrito</h2>
           </div>
-          <button type="button" class="icon-btn" data-action="close-cart" aria-label="Cerrar carrito">✕</button>
+          <button type="button" class="icon-btn" data-action="close-cart" aria-label="Cerrar carrito"></button>
         </header>
 
         <div class="cart-body">
@@ -621,7 +621,7 @@ const app = {
       localStorage.removeItem(NOTES_KEY);
       this.closeCart();
 
-      toast(`Pedido ${order.code} confirmado 🎉`, 'success', 6000);
+      toast(`Pedido ${order.code} confirmado `, 'success', 6000);
       this.showOrderSuccess(order);
 
       await Promise.allSettled([this.loadCatalog(), this.loadOrders()]);
@@ -802,7 +802,7 @@ Promise.resolve(window.__kioscoReady)
     if (!view) return;
     view.innerHTML =
       '<div class="error-block">' +
-      '<span class="empty-icon">⚠️</span>' +
+      '<span class="empty-icon"></span>' +
       '<h3>No se pudo iniciar el kiosco</h3>' +
       '<p>Recargá la página. Si abriste index.html con doble clic, debería funcionar igual en el navegador.</p>' +
       '</div>';

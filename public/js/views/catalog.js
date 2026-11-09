@@ -9,7 +9,7 @@ function productCard(app, product) {
   return `
     <article class="product-card" data-card="${product.id}">
       <div class="product-media">
-        <span class="product-emoji" aria-hidden="true">${escapeHtml(product.emoji || '🛒')}</span>
+        <span class="product-emoji" aria-hidden="true">${escapeHtml(product.emoji || '')}</span>
         <span class="stock-pill stock-${stock.tone}"><span class="stock-dot"></span>${escapeHtml(stock.label)}</span>
       </div>
       <div class="product-body">
@@ -45,7 +45,7 @@ export function renderCatalog(app, container) {
       <div class="hero">
         <div class="hero-copy">
           <p class="eyebrow">Kiosco abierto</p>
-          <h1>¡Hola, ${escapeHtml(firstName)}! 👋</h1>
+          <h1>¡Hola, ${escapeHtml(firstName)}! </h1>
           <p class="hero-text">Elegí tus productos, sumalos al carrito y reservalos para el recreo que quieras.</p>
           <div class="hero-recreos">
             ${recreos
@@ -62,16 +62,16 @@ export function renderCatalog(app, container) {
           </div>
         </div>
         <div class="hero-art" aria-hidden="true">
-          <span class="float-emoji emoji-1">🍫</span>
-          <span class="float-emoji emoji-2">🥤</span>
-          <span class="float-emoji emoji-3">🥐</span>
-          <span class="hero-bag">🛍️</span>
+          <span class="float-emoji emoji-1"></span>
+          <span class="float-emoji emoji-2"></span>
+          <span class="float-emoji emoji-3"></span>
+          <span class="hero-bag"></span>
         </div>
       </div>
 
       <div class="catalog-toolbar">
         <label class="search-field">
-          <span aria-hidden="true">🔎</span>
+          <span aria-hidden="true"></span>
           <input
             id="product-search"
             type="search"
@@ -81,7 +81,7 @@ export function renderCatalog(app, container) {
           />
         </label>
         <button type="button" class="btn btn-soft cart-inline-btn" data-action="open-cart">
-          🛒 Mi pedido
+           Mi pedido
           <span class="cart-inline-count" data-cart-count>${app.cartCount()}</span>
         </button>
       </div>
@@ -128,7 +128,7 @@ export function renderCatalog(app, container) {
         visible.length > 0
           ? `<div class="product-grid">${visible.map((product) => productCard(app, product)).join('')}</div>`
           : emptyState({
-              icon: '🔍',
+              icon: '',
               title: 'No encontramos productos',
               text: 'Probá con otra búsqueda o elegí otra categoría.',
             })

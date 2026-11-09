@@ -7,7 +7,7 @@ export function renderAuth(app, container) {
     <section class="auth">
       <div class="auth-brand">
         <a class="brand brand-light" href="#/">
-          <span class="brand-mark">🥪</span>
+          <span class="brand-mark"></span>
           <span class="brand-text">
             <strong>Kiosco del Recreo</strong>
             <small>Pedidos, stock y recreos</small>
@@ -18,20 +18,20 @@ export function renderAuth(app, container) {
           <h1>Tu merienda,<br />sin hacer fila.</h1>
           <p>Consultá el catálogo, reservá lo que querés y elegí en qué recreo lo retirás.</p>
           <ul class="auth-points">
-            <li><span>🍫</span> Productos, precios y stock actualizados</li>
-            <li><span>⏱️</span> Pedidos organizados por recreo</li>
-            <li><span>📦</span> Seguí el estado de tu pedido</li>
+            <li><span></span> Productos, precios y stock actualizados</li>
+            <li><span></span> Pedidos organizados por recreo</li>
+            <li><span></span> Seguí el estado de tu pedido</li>
           </ul>
         </div>
 
         <div class="auth-demo">
           <p class="auth-demo-title">Cuentas de prueba</p>
           <button type="button" class="demo-chip" data-fill-demo="admin">
-            <span>👩‍💼</span>
+            <span>‍</span>
             <span><strong>Administración</strong><small>admin@kiosco.local · Admin1234</small></span>
           </button>
           <button type="button" class="demo-chip" data-fill-demo="student">
-            <span>🎒</span>
+            <span></span>
             <span><strong>Alumno demo</strong><small>alumno@kiosco.local · Alumno1234</small></span>
           </button>
         </div>

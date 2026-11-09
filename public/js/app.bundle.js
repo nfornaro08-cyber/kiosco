@@ -20,29 +20,29 @@ function getInitialDbState() {
       { id: 2, name: "Alumno demo", email: "alumno@kiosco.local", password: "Alumno1234", role: "cliente" }
     ],
     categories: [
-      { id: 1, name: "Golosinas", emoji: "\uD83C\uDF6C", sortOrder: 1 },
-      { id: 2, name: "Bebidas", emoji: "\uD83E\uDD64", sortOrder: 2 },
-      { id: 3, name: "Salados", emoji: "\uD83E\uDD68", sortOrder: 3 },
-      { id: 4, name: "Panadería", emoji: "\uD83E\uDD50", sortOrder: 4 },
-      { id: 5, name: "Helados", emoji: "\uD83C\uDF66", sortOrder: 5 }
+      { id: 1, name: "Golosinas", emoji: "", sortOrder: 1 },
+      { id: 2, name: "Bebidas", emoji: "", sortOrder: 2 },
+      { id: 3, name: "Salados", emoji: "", sortOrder: 3 },
+      { id: 4, name: "Panadería", emoji: "", sortOrder: 4 },
+      { id: 5, name: "Helados", emoji: "", sortOrder: 5 }
     ],
     products: [
-      { id: 1, name: "Alfajor triple", categoryId: 1, priceCents: 150000, stock: 40, emoji: "\uD83C\uDF6B", description: "Alfajor de chocolate relleno con dulce de leche.", active: true },
-      { id: 2, name: "Chocolate", categoryId: 1, priceCents: 120000, stock: 30, emoji: "\uD83C\uDF6B", description: "Barra de chocolate con leche.", active: true },
-      { id: 3, name: "Chicles", categoryId: 1, priceCents: 50000, stock: 60, emoji: "\uD83C\uDF6C", description: "Chicles de menta, caja chica.", active: true },
-      { id: 4, name: "Caramelos", categoryId: 1, priceCents: 30000, stock: 80, emoji: "\uD83C\uDF6C", description: "Caramelos surtidos.", active: true },
-      { id: 5, name: "Agua mineral", categoryId: 2, priceCents: 90000, stock: 35, emoji: "\uD83D\uDCA7", description: "Botella de 500 ml sin gas.", active: true },
-      { id: 6, name: "Gaseosa", categoryId: 2, priceCents: 140000, stock: 25, emoji: "\uD83E\uDD64", description: "Botella de 500 ml.", active: true },
-      { id: 7, name: "Jugo natural", categoryId: 2, priceCents: 110000, stock: 20, emoji: "\uD83E\uDDC3", description: "Jugo de frutas en cajita.", active: true },
-      { id: 8, name: "Chocolatada", categoryId: 2, priceCents: 130000, stock: 18, emoji: "\uD83E\uDD5B", description: "Leche chocolatada de 200 ml.", active: true },
-      { id: 9, name: "Papas fritas", categoryId: 3, priceCents: 160000, stock: 22, emoji: "\uD83C\uDF5F", description: "Bolsa de papas fritas clásicas.", active: true },
-      { id: 10, name: "Palitos salados", categoryId: 3, priceCents: 80000, stock: 30, emoji: "\uD83E\uDD68", description: "Palitos de queso.", active: true },
-      { id: 11, name: "Chizitos", categoryId: 3, priceCents: 90000, stock: 28, emoji: "\uD83E\uDDC0", description: "Snack de maíz sabor queso.", active: true },
-      { id: 12, name: "Medialuna", categoryId: 4, priceCents: 60000, stock: 24, emoji: "\uD83E\uDD50", description: "Medialuna de manteca.", active: true },
-      { id: 13, name: "Sandwich", categoryId: 4, priceCents: 180000, stock: 12, emoji: "\uD83E\uDD6A", description: "Sandwich de jamón y queso.", active: true },
-      { id: 14, name: "Bizcochuelo", categoryId: 4, priceCents: 1e5, stock: 15, emoji: "\uD83C\uDF70", description: "Porción de bizcochuelo casero.", active: true },
-      { id: 15, name: "Palito de agua", categoryId: 5, priceCents: 80000, stock: 26, emoji: "\uD83C\uDF67", description: "Helado de agua sabor limón.", active: true },
-      { id: 16, name: "Helado de crema", categoryId: 5, priceCents: 150000, stock: 16, emoji: "\uD83C\uDF66", description: "Cucurucho de crema americana.", active: true }
+      { id: 1, name: "Alfajor triple", categoryId: 1, priceCents: 150000, stock: 40, emoji: "", description: "Alfajor de chocolate relleno con dulce de leche.", active: true },
+      { id: 2, name: "Chocolate", categoryId: 1, priceCents: 120000, stock: 30, emoji: "", description: "Barra de chocolate con leche.", active: true },
+      { id: 3, name: "Chicles", categoryId: 1, priceCents: 50000, stock: 60, emoji: "", description: "Chicles de menta, caja chica.", active: true },
+      { id: 4, name: "Caramelos", categoryId: 1, priceCents: 30000, stock: 80, emoji: "", description: "Caramelos surtidos.", active: true },
+      { id: 5, name: "Agua mineral", categoryId: 2, priceCents: 90000, stock: 35, emoji: "", description: "Botella de 500 ml sin gas.", active: true },
+      { id: 6, name: "Gaseosa", categoryId: 2, priceCents: 140000, stock: 25, emoji: "", description: "Botella de 500 ml.", active: true },
+      { id: 7, name: "Jugo natural", categoryId: 2, priceCents: 110000, stock: 20, emoji: "", description: "Jugo de frutas en cajita.", active: true },
+      { id: 8, name: "Chocolatada", categoryId: 2, priceCents: 130000, stock: 18, emoji: "", description: "Leche chocolatada de 200 ml.", active: true },
+      { id: 9, name: "Papas fritas", categoryId: 3, priceCents: 160000, stock: 22, emoji: "", description: "Bolsa de papas fritas clásicas.", active: true },
+      { id: 10, name: "Palitos salados", categoryId: 3, priceCents: 80000, stock: 30, emoji: "", description: "Palitos de queso.", active: true },
+      { id: 11, name: "Chizitos", categoryId: 3, priceCents: 90000, stock: 28, emoji: "", description: "Snack de maíz sabor queso.", active: true },
+      { id: 12, name: "Medialuna", categoryId: 4, priceCents: 60000, stock: 24, emoji: "", description: "Medialuna de manteca.", active: true },
+      { id: 13, name: "Sandwich", categoryId: 4, priceCents: 180000, stock: 12, emoji: "", description: "Sandwich de jamón y queso.", active: true },
+      { id: 14, name: "Bizcochuelo", categoryId: 4, priceCents: 1e5, stock: 15, emoji: "", description: "Porción de bizcochuelo casero.", active: true },
+      { id: 15, name: "Palito de agua", categoryId: 5, priceCents: 80000, stock: 26, emoji: "", description: "Helado de agua sabor limón.", active: true },
+      { id: 16, name: "Helado de crema", categoryId: 5, priceCents: 150000, stock: 16, emoji: "", description: "Cucurucho de crema americana.", active: true }
     ],
     recreos: [
       { id: 1, name: "Primer recreo", startTime: "09:30", endTime: "09:45", active: true, sortOrder: 1 },
@@ -353,7 +353,7 @@ var localBackend = {
         categoryId: Number(payload.categoryId) || null,
         priceCents: Number(payload.priceCents) || 0,
         stock: Number(payload.stock) || 0,
-        emoji: payload.emoji || "\uD83E\uDD6A",
+        emoji: payload.emoji || "",
         active: payload.active !== undefined ? Boolean(payload.active) : true,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
@@ -419,7 +419,7 @@ var localBackend = {
       const newCat = {
         id: db.categoriesSeq++,
         name: String(payload.name).trim(),
-        emoji: payload.emoji || "\uD83D\uDCE6",
+        emoji: payload.emoji || "",
         sortOrder: Number(payload.sortOrder) || db.categories.length + 1
       };
       db.categories.push(newCat);
@@ -778,11 +778,11 @@ function formatLongDate(isoDate) {
   return date.toLocaleDateString("es-AR", { weekday: "long", day: "numeric", month: "long", timeZone: "UTC" });
 }
 var STATUS_META = {
-  pendiente: { label: "Pendiente", tone: "amber", icon: "⏳", step: 1 },
-  preparando: { label: "En preparación", tone: "blue", icon: "\uD83D\uDC69‍\uD83C\uDF73", step: 2 },
-  listo: { label: "Listo para retirar", tone: "green", icon: "✅", step: 3 },
-  entregado: { label: "Entregado", tone: "slate", icon: "\uD83C\uDF89", step: 4 },
-  cancelado: { label: "Cancelado", tone: "red", icon: "✕", step: 0 }
+  pendiente: { label: "Pendiente", tone: "amber", icon: "", step: 1 },
+  preparando: { label: "En preparación", tone: "blue", icon: "‍", step: 2 },
+  listo: { label: "Listo para retirar", tone: "green", icon: "", step: 3 },
+  entregado: { label: "Entregado", tone: "slate", icon: "", step: 4 },
+  cancelado: { label: "Cancelado", tone: "red", icon: "", step: 0 }
 };
 function statusBadge(status) {
   const meta = STATUS_META[status] ?? { label: status, tone: "slate", icon: "•" };
@@ -816,7 +816,7 @@ function toast(message, tone = "success", timeout = 4000) {
     return;
   const element = document.createElement("div");
   element.className = `toast toast-${tone}`;
-  element.innerHTML = `<span class="toast-icon">${tone === "success" ? "✓" : tone === "error" ? "!" : "i"}</span><span class="toast-text">${escapeHtml(message)}</span>`;
+  element.innerHTML = `<span class="toast-icon">${tone === "success" ? "" : tone === "error" ? "!" : "i"}</span><span class="toast-text">${escapeHtml(message)}</span>`;
   host.appendChild(element);
   requestAnimationFrame(() => element.classList.add("is-visible"));
   setTimeout(() => {
@@ -835,7 +835,7 @@ function openModal({ title, subtitle = "", content = "", footer = "", size = "" 
           <h2>${escapeHtml(title)}</h2>
           ${subtitle ? `<p class="modal-subtitle">${escapeHtml(subtitle)}</p>` : ""}
         </div>
-        <button type="button" class="icon-btn" data-close aria-label="Cerrar">✕</button>
+        <button type="button" class="icon-btn" data-close aria-label="Cerrar"></button>
       </header>
       <div class="modal-body">${content}</div>
       ${footer ? `<footer class="modal-foot">${footer}</footer>` : ""}
@@ -914,7 +914,7 @@ function spinnerBlock(text = "Cargando...") {
     </div>
   `;
 }
-function emptyState({ icon = "\uD83E\uDDFA", title = "Nada por aquí", text = "", action = "" } = {}) {
+function emptyState({ icon = "", title = "Nada por aquí", text = "", action = "" } = {}) {
   return `
     <div class="empty-state">
       <span class="empty-icon">${icon}</span>
@@ -927,7 +927,7 @@ function emptyState({ icon = "\uD83E\uDDFA", title = "Nada por aquí", text = ""
 function errorBlock(message, retryAction = "retry") {
   return `
     <div class="error-block">
-      <span class="empty-icon">⚠️</span>
+      <span class="empty-icon"></span>
       <h3>Algo salió mal</h3>
       <p>${escapeHtml(message)}</p>
       <button class="btn btn-primary" data-action="${retryAction}">Reintentar</button>
@@ -956,7 +956,7 @@ function renderAuth(app, container) {
     <section class="auth">
       <div class="auth-brand">
         <a class="brand brand-light" href="#/">
-          <span class="brand-mark">\uD83E\uDD6A</span>
+          <span class="brand-mark"></span>
           <span class="brand-text">
             <strong>Kiosco del Recreo</strong>
             <small>Pedidos, stock y recreos</small>
@@ -967,20 +967,20 @@ function renderAuth(app, container) {
           <h1>Tu merienda,<br />sin hacer fila.</h1>
           <p>Consultá el catálogo, reservá lo que querés y elegí en qué recreo lo retirás.</p>
           <ul class="auth-points">
-            <li><span>\uD83C\uDF6B</span> Productos, precios y stock actualizados</li>
-            <li><span>⏱️</span> Pedidos organizados por recreo</li>
-            <li><span>\uD83D\uDCE6</span> Seguí el estado de tu pedido</li>
+            <li><span></span> Productos, precios y stock actualizados</li>
+            <li><span></span> Pedidos organizados por recreo</li>
+            <li><span></span> Seguí el estado de tu pedido</li>
           </ul>
         </div>
 
         <div class="auth-demo">
           <p class="auth-demo-title">Cuentas de prueba</p>
           <button type="button" class="demo-chip" data-fill-demo="admin">
-            <span>\uD83D\uDC69‍\uD83D\uDCBC</span>
+            <span>‍</span>
             <span><strong>Administración</strong><small>admin@kiosco.local · Admin1234</small></span>
           </button>
           <button type="button" class="demo-chip" data-fill-demo="student">
-            <span>\uD83C\uDF92</span>
+            <span></span>
             <span><strong>Alumno demo</strong><small>alumno@kiosco.local · Alumno1234</small></span>
           </button>
         </div>
@@ -1125,7 +1125,7 @@ function productCard(app, product) {
   return `
     <article class="product-card" data-card="${product.id}">
       <div class="product-media">
-        <span class="product-emoji" aria-hidden="true">${escapeHtml(product.emoji || "\uD83D\uDED2")}</span>
+        <span class="product-emoji" aria-hidden="true">${escapeHtml(product.emoji || "")}</span>
         <span class="stock-pill stock-${stock.tone}"><span class="stock-dot"></span>${escapeHtml(stock.label)}</span>
       </div>
       <div class="product-body">
@@ -1158,7 +1158,7 @@ function renderCatalog(app, container) {
       <div class="hero">
         <div class="hero-copy">
           <p class="eyebrow">Kiosco abierto</p>
-          <h1>¡Hola, ${escapeHtml(firstName)}! \uD83D\uDC4B</h1>
+          <h1>¡Hola, ${escapeHtml(firstName)}! </h1>
           <p class="hero-text">Elegí tus productos, sumalos al carrito y reservalos para el recreo que quieras.</p>
           <div class="hero-recreos">
             ${recreos.map((recreo) => `
@@ -1171,16 +1171,16 @@ function renderCatalog(app, container) {
           </div>
         </div>
         <div class="hero-art" aria-hidden="true">
-          <span class="float-emoji emoji-1">\uD83C\uDF6B</span>
-          <span class="float-emoji emoji-2">\uD83E\uDD64</span>
-          <span class="float-emoji emoji-3">\uD83E\uDD50</span>
-          <span class="hero-bag">\uD83D\uDECD️</span>
+          <span class="float-emoji emoji-1"></span>
+          <span class="float-emoji emoji-2"></span>
+          <span class="float-emoji emoji-3"></span>
+          <span class="hero-bag"></span>
         </div>
       </div>
 
       <div class="catalog-toolbar">
         <label class="search-field">
-          <span aria-hidden="true">\uD83D\uDD0E</span>
+          <span aria-hidden="true"></span>
           <input
             id="product-search"
             type="search"
@@ -1190,7 +1190,7 @@ function renderCatalog(app, container) {
           />
         </label>
         <button type="button" class="btn btn-soft cart-inline-btn" data-action="open-cart">
-          \uD83D\uDED2 Mi pedido
+           Mi pedido
           <span class="cart-inline-count" data-cart-count>${app.cartCount()}</span>
         </button>
       </div>
@@ -1226,7 +1226,7 @@ function renderCatalog(app, container) {
         ${filters.search ? `<button type="button" class="link-btn" data-clear-search>Limpiar búsqueda</button>` : ""}
       </div>
       ${visible.length > 0 ? `<div class="product-grid">${visible.map((product) => productCard(app, product)).join("")}</div>` : emptyState({
-      icon: "\uD83D\uDD0D",
+      icon: "",
       title: "No encontramos productos",
       text: "Probá con otra búsqueda o elegí otra categoría."
     })}
@@ -1280,7 +1280,7 @@ var STEPS = [
 ];
 function renderTimeline(order) {
   if (order.status === "cancelado") {
-    return `<p class="order-cancelled">✕ Pedido cancelado · el stock fue devuelto al kiosco</p>`;
+    return `<p class="order-cancelled"> Pedido cancelado · el stock fue devuelto al kiosco</p>`;
   }
   const currentStep = STATUS_META[order.status]?.step ?? 1;
   return `
@@ -1292,7 +1292,7 @@ function renderTimeline(order) {
       classes.push("is-done");
     if (position === currentStep)
       classes.push("is-current");
-    return `<li class="${classes.join(" ")}"><span class="timeline-dot">${position <= currentStep ? "✓" : position}</span><span class="timeline-label">${step.label}</span></li>`;
+    return `<li class="${classes.join(" ")}"><span class="timeline-dot">${position <= currentStep ? "" : position}</span><span class="timeline-label">${step.label}</span></li>`;
   }).join("")}
     </ol>
   `;
@@ -1320,7 +1320,7 @@ function renderOrderCard(order) {
                 <span class="order-item-amount">${money(item.subtotalCents)}</span>
               </li>`).join("")}
         </ul>
-        ${order.notes ? `<p class="order-notes">\uD83D\uDCDD ${escapeHtml(order.notes)}</p>` : ""}
+        ${order.notes ? `<p class="order-notes"> ${escapeHtml(order.notes)}</p>` : ""}
         ${renderTimeline(order)}
       </div>
 
@@ -1345,7 +1345,7 @@ async function renderOrders(app, container) {
           <h1>Mis pedidos</h1>
           <p class="page-sub">Seguí el estado de cada pedido. La lista se actualiza sola cada 20 segundos.</p>
         </div>
-        <button type="button" class="btn btn-soft" data-action="open-cart">\uD83D\uDED2 Armar otro pedido</button>
+        <button type="button" class="btn btn-soft" data-action="open-cart"> Armar otro pedido</button>
       </header>
       <div id="orders-list">${spinnerBlock("Cargando tus pedidos...")}</div>
     </section>
@@ -1355,7 +1355,7 @@ async function renderOrders(app, container) {
     const { orders } = app.state;
     if (!orders.length) {
       list.innerHTML = emptyState({
-        icon: "\uD83E\uDDFE",
+        icon: "",
         title: "Todavía no hiciste pedidos",
         text: "Armá tu pedido, elegí el recreo y seguí su estado desde acá.",
         action: '<button type="button" class="btn btn-primary" data-action="open-cart">Ver el catálogo</button>'
@@ -1378,12 +1378,12 @@ async function renderOrders(app, container) {
 
 // public/js/views/admin.js
 var TABS = [
-  { id: "resumen", label: "Resumen", icon: "\uD83D\uDCCA" },
-  { id: "productos", label: "Productos", icon: "\uD83C\uDF6B" },
-  { id: "pedidos", label: "Pedidos", icon: "\uD83E\uDDFE" },
-  { id: "recreos", label: "Recreos", icon: "⏰" },
-  { id: "categorias", label: "Categorías", icon: "\uD83C\uDFF7️" },
-  { id: "usuarios", label: "Usuarios", icon: "\uD83D\uDC65" }
+  { id: "resumen", label: "Resumen", icon: "" },
+  { id: "productos", label: "Productos", icon: "" },
+  { id: "pedidos", label: "Pedidos", icon: "" },
+  { id: "recreos", label: "Recreos", icon: "" },
+  { id: "categorias", label: "Categorías", icon: "" },
+  { id: "usuarios", label: "Usuarios", icon: "" }
 ];
 var filters = {
   productsSearch: "",
@@ -1431,7 +1431,7 @@ async function renderAdmin(app, container, activeTab = "resumen") {
     <section class="admin">
       <aside class="admin-side">
         <div class="admin-brand">
-          <span class="admin-brand-icon">\uD83E\uDDD1‍\uD83D\uDCBC</span>
+          <span class="admin-brand-icon">‍</span>
           <div>
             <strong>Administración</strong>
             <small>Kiosco del Recreo</small>
@@ -1490,10 +1490,10 @@ async function paintResumen(main, app) {
       </header>
 
       <div class="stat-grid">
-        ${statCard("Pedidos de hoy", stats.ordersToday, "\uD83E\uDDFE", `${stats.byStatus.pendiente.count} pendientes`)}
-        ${statCard("En curso", stats.activeOrders, "⏳", "para preparar o retirar")}
-        ${statCard("Recaudado hoy", money(stats.deliveredTodayCents), "\uD83D\uDCB0", "pedidos entregados")}
-        ${statCard("Stock bajo", stats.lowStock.length, "\uD83D\uDCE6", "productos con 5 o menos")}
+        ${statCard("Pedidos de hoy", stats.ordersToday, "", `${stats.byStatus.pendiente.count} pendientes`)}
+        ${statCard("En curso", stats.activeOrders, "", "para preparar o retirar")}
+        ${statCard("Recaudado hoy", money(stats.deliveredTodayCents), "", "pedidos entregados")}
+        ${statCard("Stock bajo", stats.lowStock.length, "", "productos con 5 o menos")}
       </div>
 
       <div class="admin-grid">
@@ -1516,7 +1516,7 @@ async function paintResumen(main, app) {
                           </tr>`).join("")}
                     </tbody>
                   </table>
-                </div>` : emptyState({ icon: "\uD83E\uDDFE", title: "Sin pedidos por ahora", text: "Los pedidos de hoy van a aparecer acá." })}
+                </div>` : emptyState({ icon: "", title: "Sin pedidos por ahora", text: "Los pedidos de hoy van a aparecer acá." })}
         </section>
 
         <section class="panel">
@@ -1533,7 +1533,7 @@ async function paintResumen(main, app) {
                         <span class="stock-pill stock-${stock.tone}">${product.stock} u.</span>
                       </li>`;
     }).join("")}
-                </ul>` : '<p class="muted">Todo el stock está en orden \uD83D\uDC4C</p>'}
+                </ul>` : '<p class="muted">Todo el stock está en orden </p>'}
         </section>
 
         <section class="panel">
@@ -1559,7 +1559,7 @@ function productRow(product) {
     <tr>
       <td>
         <div class="cell-product">
-          <span class="cell-emoji">${escapeHtml(product.emoji || "\uD83D\uDED2")}</span>
+          <span class="cell-emoji">${escapeHtml(product.emoji || "")}</span>
           <div>
             <strong>${escapeHtml(product.name)}</strong>
             <small>${escapeHtml(product.description || "Sin descripción")}</small>
@@ -1601,7 +1601,7 @@ async function paintProductos(main, app) {
       <div class="panel">
         <div class="panel-toolbar">
           <label class="search-field">
-            <span aria-hidden="true">\uD83D\uDD0E</span>
+            <span aria-hidden="true"></span>
             <input id="admin-product-search" type="search" placeholder="Buscar producto..." value="${escapeHtml(filters.productsSearch)}" />
           </label>
           <span class="toolbar-note" id="product-visible-count"></span>
@@ -1630,7 +1630,7 @@ async function paintProductos(main, app) {
               </thead>
               <tbody>${visible.map(productRow).join("")}</tbody>
             </table>
-          </div>` : emptyState({ icon: "\uD83D\uDD0D", title: "Sin resultados", text: "Probá con otro nombre o creá un producto nuevo." });
+          </div>` : emptyState({ icon: "", title: "Sin resultados", text: "Probá con otro nombre o creá un producto nuevo." });
     }
     paintRows();
     search.addEventListener("input", () => {
@@ -1651,14 +1651,14 @@ function adminOrderCard(order) {
           <span class="admin-order-date">${escapeHtml(formatDateTime(order.createdAt))}</span>
         </div>
         <p class="admin-order-user">
-          \uD83D\uDC64 <strong>${escapeHtml(order.userName ?? "Alumno")}</strong>
+           <strong>${escapeHtml(order.userName ?? "Alumno")}</strong>
           <span>${escapeHtml(order.userEmail ?? "")}</span>
           · ${escapeHtml(order.recreoName ?? "")} ${escapeHtml(order.recreoStartTime ?? "")}–${escapeHtml(order.recreoEndTime ?? "")}
         </p>
         <ul class="admin-order-items">
           ${order.items.map((item) => `<li><span>${item.quantity}×</span> ${escapeHtml(item.productName)} <em>${money(item.subtotalCents)}</em></li>`).join("")}
         </ul>
-        ${order.notes ? `<p class="order-notes">\uD83D\uDCDD ${escapeHtml(order.notes)}</p>` : ""}
+        ${order.notes ? `<p class="order-notes"> ${escapeHtml(order.notes)}</p>` : ""}
       </div>
       <div class="admin-order-side">
         <span class="admin-order-total">${money(order.totalCents)}</span>
@@ -1721,7 +1721,7 @@ async function paintPedidos(main, app) {
 
         <div class="admin-orders">
           ${orders.length ? orders.map(adminOrderCard).join("") : emptyState({
-      icon: "\uD83E\uDDFE",
+      icon: "",
       title: "No hay pedidos con esos filtros",
       text: "Probá cambiando la fecha o el estado."
     })}
@@ -1748,7 +1748,7 @@ async function paintRecreos(main, app) {
               ${recreos.map((recreo) => `
                 <article class="panel recreo-card ${recreo.active ? "" : "is-inactive"}">
                   <div class="recreo-card-head">
-                    <span class="recreo-clock">⏰</span>
+                    <span class="recreo-clock"></span>
                     ${recreo.active ? '<span class="badge badge-green">Habilitado</span>' : '<span class="badge badge-slate">Deshabilitado</span>'}
                   </div>
                   <h2>${escapeHtml(recreo.name)}</h2>
@@ -1762,7 +1762,7 @@ async function paintRecreos(main, app) {
                   </div>
                 </article>`).join("")}
             </div>` : emptyState({
-      icon: "⏰",
+      icon: "",
       title: "Todavía no hay recreos",
       text: "Creá al menos un recreo para que los alumnos puedan hacer pedidos.",
       action: '<button type="button" class="btn btn-primary" data-action="new-recreo">Crear recreo</button>'
@@ -1798,7 +1798,7 @@ async function paintCategorias(main, app) {
                         <button type="button" class="btn btn-ghost btn-sm danger-text" data-action="delete-category" data-id="${category.id}">Eliminar</button>
                       </span>
                     </li>`).join("")}
-              </ul>` : emptyState({ icon: "\uD83C\uDFF7️", title: "Sin categorías", text: "Creá la primera categoría del kiosco." })}
+              </ul>` : emptyState({ icon: "", title: "Sin categorías", text: "Creá la primera categoría del kiosco." })}
       </div>
     `;
   });
@@ -2031,7 +2031,7 @@ async function openProductModal(app, product, onSaved) {
           </div>
           <div class="field">
             <label for="p-emoji">Emoji</label>
-            <input id="p-emoji" name="emoji" maxlength="8" value="${escapeHtml(product?.emoji ?? "\uD83D\uDED2")}" />
+            <input id="p-emoji" name="emoji" maxlength="8" value="${escapeHtml(product?.emoji ?? "")}" />
           </div>
         </div>
 
@@ -2096,7 +2096,7 @@ async function openProductModal(app, product, onSaved) {
     }
     const payload = {
       name: form.name.value.trim(),
-      emoji: form.emoji.value.trim() || "\uD83D\uDED2",
+      emoji: form.emoji.value.trim() || "",
       categoryId: form.categoryId.value ? Number(form.categoryId.value) : null,
       priceCents: Math.round(priceNumber * 100),
       stock: stockNumber,
@@ -2136,7 +2136,7 @@ async function openCategoryModal(app, category, onSaved) {
           </div>
           <div class="field">
             <label for="c-emoji">Emoji</label>
-            <input id="c-emoji" name="emoji" maxlength="8" value="${escapeHtml(category?.emoji ?? "\uD83C\uDF6C")}" />
+            <input id="c-emoji" name="emoji" maxlength="8" value="${escapeHtml(category?.emoji ?? "")}" />
           </div>
         </div>
         <div class="field">
@@ -2158,7 +2158,7 @@ async function openCategoryModal(app, category, onSaved) {
     const submitButton = modal.root.querySelector('[type="submit"]');
     const payload = {
       name: form.name.value.trim(),
-      emoji: form.emoji.value.trim() || "\uD83C\uDF6C",
+      emoji: form.emoji.value.trim() || "",
       sortOrder: Number(form.sortOrder.value) || 0
     };
     setButtonLoading(submitButton, true);
@@ -2505,7 +2505,7 @@ var app = {
     if (this.state.catalogError) {
       view.innerHTML = `
         <div class="error-block">
-          <span class="empty-icon">⚠️</span>
+          <span class="empty-icon"></span>
           <h3>No pudimos cargar el catálogo</h3>
           <p>${escapeHtml(this.state.catalogError)}</p>
           <button type="button" class="btn btn-primary" data-action="reload-catalog">Reintentar</button>
@@ -2539,7 +2539,7 @@ var app = {
     topbar.innerHTML = `
       <div class="topbar-inner">
         <a class="brand" href="#/catalogo">
-          <span class="brand-mark">\uD83E\uDD6A</span>
+          <span class="brand-mark"></span>
           <span class="brand-text">
             <strong>Kiosco del Recreo</strong>
             <small>Pedidos y stock</small>
@@ -2557,7 +2557,7 @@ var app = {
 
         <div class="topbar-actions">
           ${route.name === "admin" ? "" : `<button type="button" class="cart-btn" data-action="open-cart" aria-label="Abrir mi pedido">
-                   <span aria-hidden="true">\uD83D\uDED2</span>
+                   <span aria-hidden="true"></span>
                    <span class="cart-label">Mi pedido</span>
                    <span class="cart-count" data-cart-count>${this.cartCount()}</span>
                  </button>`}
@@ -2568,8 +2568,8 @@ var app = {
               <small>${user.role === "admin" ? "Administración" : "Alumno"}</small>
             </span>
           </div>
-          <button type="button" class="icon-btn" data-action="change-password" title="Cambiar contraseña" aria-label="Cambiar contraseña">\uD83D\uDD11</button>
-          <button type="button" class="icon-btn logout-btn" data-action="logout" title="Cerrar sesión" aria-label="Cerrar sesión">⏻</button>
+          <button type="button" class="icon-btn" data-action="change-password" title="Cambiar contraseña" aria-label="Cambiar contraseña"></button>
+          <button type="button" class="icon-btn logout-btn" data-action="logout" title="Cerrar sesión" aria-label="Cerrar sesión"></button>
         </div>
       </div>
     `;
@@ -2674,7 +2674,7 @@ var app = {
       const overStock = line.quantity > line.product.stock;
       return `
               <div class="cart-line ${overStock ? "is-warning" : ""}">
-                <span class="cart-line-emoji" aria-hidden="true">${escapeHtml(line.product.emoji || "\uD83D\uDED2")}</span>
+                <span class="cart-line-emoji" aria-hidden="true">${escapeHtml(line.product.emoji || "")}</span>
                 <div class="cart-line-info">
                   <strong>${escapeHtml(line.product.name)}</strong>
                   <small>${money(line.product.priceCents)} c/u${overStock ? " · stock insuficiente" : ""}</small>
@@ -2685,11 +2685,11 @@ var app = {
                   <button type="button" class="qty-btn" data-action="cart-inc" data-id="${line.productId}" aria-label="Agregar una unidad" ${line.quantity >= line.product.stock ? "disabled" : ""}>+</button>
                 </div>
                 <span class="cart-line-total">${money(line.product.priceCents * line.quantity)}</span>
-                <button type="button" class="icon-btn icon-btn-sm cart-remove" data-action="cart-remove" data-id="${line.productId}" aria-label="Quitar ${escapeHtml(line.product.name)}">✕</button>
+                <button type="button" class="icon-btn icon-btn-sm cart-remove" data-action="cart-remove" data-id="${line.productId}" aria-label="Quitar ${escapeHtml(line.product.name)}"></button>
               </div>
             `;
     }).join("") : emptyState({
-      icon: "\uD83D\uDED2",
+      icon: "",
       title: "Tu carrito está vacío",
       text: "Sumá productos desde el catálogo.",
       action: '<button type="button" class="btn btn-primary btn-sm" data-action="close-cart">Ver catálogo</button>'
@@ -2702,7 +2702,7 @@ var app = {
             <p class="eyebrow">Tu pedido</p>
             <h2>Carrito</h2>
           </div>
-          <button type="button" class="icon-btn" data-action="close-cart" aria-label="Cerrar carrito">✕</button>
+          <button type="button" class="icon-btn" data-action="close-cart" aria-label="Cerrar carrito"></button>
         </header>
 
         <div class="cart-body">
@@ -2770,7 +2770,7 @@ var app = {
       this.persistCart();
       localStorage.removeItem(NOTES_KEY);
       this.closeCart();
-      toast(`Pedido ${order.code} confirmado \uD83C\uDF89`, "success", 6000);
+      toast(`Pedido ${order.code} confirmado `, "success", 6000);
       this.showOrderSuccess(order);
       await Promise.allSettled([this.loadCatalog(), this.loadOrders()]);
       this.navigate("pedidos");
@@ -2920,5 +2920,5 @@ Promise.resolve(window.__kioscoReady).catch(function() {}).then(function() {
   var view = document.getElementById("view");
   if (!view)
     return;
-  view.innerHTML = '<div class="error-block">' + '<span class="empty-icon">⚠️</span>' + "<h3>No se pudo iniciar el kiosco</h3>" + "<p>Recargá la página. Si abriste index.html con doble clic, debería funcionar igual en el navegador.</p>" + "</div>";
+  view.innerHTML = '<div class="error-block">' + '<span class="empty-icon"></span>' + "<h3>No se pudo iniciar el kiosco</h3>" + "<p>Recargá la página. Si abriste index.html con doble clic, debería funcionar igual en el navegador.</p>" + "</div>";
 });

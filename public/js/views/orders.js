@@ -11,7 +11,7 @@ const STEPS = [
 
 function renderTimeline(order) {
   if (order.status === 'cancelado') {
-    return `<p class="order-cancelled">✕ Pedido cancelado · el stock fue devuelto al kiosco</p>`;
+    return `<p class="order-cancelled"> Pedido cancelado · el stock fue devuelto al kiosco</p>`;
   }
   const currentStep = STATUS_META[order.status]?.step ?? 1;
   return `
@@ -21,7 +21,7 @@ function renderTimeline(order) {
         const classes = ['timeline-step'];
         if (position <= currentStep) classes.push('is-done');
         if (position === currentStep) classes.push('is-current');
-        return `<li class="${classes.join(' ')}"><span class="timeline-dot">${position <= currentStep ? '✓' : position}</span><span class="timeline-label">${step.label}</span></li>`;
+        return `<li class="${classes.join(' ')}"><span class="timeline-dot">${position <= currentStep ? '' : position}</span><span class="timeline-label">${step.label}</span></li>`;
       }).join('')}
     </ol>
   `;
@@ -54,7 +54,7 @@ function renderOrderCard(order) {
             )
             .join('')}
         </ul>
-        ${order.notes ? `<p class="order-notes">📝 ${escapeHtml(order.notes)}</p>` : ''}
+        ${order.notes ? `<p class="order-notes"> ${escapeHtml(order.notes)}</p>` : ''}
         ${renderTimeline(order)}
       </div>
 
@@ -92,7 +92,7 @@ export async function renderOrders(app, container) {
           <h1>Mis pedidos</h1>
           <p class="page-sub">Seguí el estado de cada pedido. La lista se actualiza sola cada 20 segundos.</p>
         </div>
-        <button type="button" class="btn btn-soft" data-action="open-cart">🛒 Armar otro pedido</button>
+        <button type="button" class="btn btn-soft" data-action="open-cart"> Armar otro pedido</button>
       </header>
       <div id="orders-list">${spinnerBlock('Cargando tus pedidos...')}</div>
     </section>
@@ -104,7 +104,7 @@ export async function renderOrders(app, container) {
     const { orders } = app.state;
     if (!orders.length) {
       list.innerHTML = emptyState({
-        icon: '🧾',
+        icon: '',
         title: 'Todavía no hiciste pedidos',
         text: 'Armá tu pedido, elegí el recreo y seguí su estado desde acá.',
         action: '<button type="button" class="btn btn-primary" data-action="open-cart">Ver el catálogo</button>',

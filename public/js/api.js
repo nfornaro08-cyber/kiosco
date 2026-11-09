@@ -27,29 +27,29 @@ function getInitialDbState() {
       { id: 2, name: 'Alumno demo', email: 'alumno@kiosco.local', password: 'Alumno1234', role: 'cliente' }
     ],
     categories: [
-      { id: 1, name: 'Golosinas', emoji: '🍬', sortOrder: 1 },
-      { id: 2, name: 'Bebidas', emoji: '🥤', sortOrder: 2 },
-      { id: 3, name: 'Salados', emoji: '🥨', sortOrder: 3 },
-      { id: 4, name: 'Panadería', emoji: '🥐', sortOrder: 4 },
-      { id: 5, name: 'Helados', emoji: '🍦', sortOrder: 5 }
+      { id: 1, name: 'Golosinas', emoji: '', sortOrder: 1 },
+      { id: 2, name: 'Bebidas', emoji: '', sortOrder: 2 },
+      { id: 3, name: 'Salados', emoji: '', sortOrder: 3 },
+      { id: 4, name: 'Panadería', emoji: '', sortOrder: 4 },
+      { id: 5, name: 'Helados', emoji: '', sortOrder: 5 }
     ],
     products: [
-      { id: 1, name: 'Alfajor triple', categoryId: 1, priceCents: 150000, stock: 40, emoji: '🍫', description: 'Alfajor de chocolate relleno con dulce de leche.', active: true },
-      { id: 2, name: 'Chocolate', categoryId: 1, priceCents: 120000, stock: 30, emoji: '🍫', description: 'Barra de chocolate con leche.', active: true },
-      { id: 3, name: 'Chicles', categoryId: 1, priceCents: 50000, stock: 60, emoji: '🍬', description: 'Chicles de menta, caja chica.', active: true },
-      { id: 4, name: 'Caramelos', categoryId: 1, priceCents: 30000, stock: 80, emoji: '🍬', description: 'Caramelos surtidos.', active: true },
-      { id: 5, name: 'Agua mineral', categoryId: 2, priceCents: 90000, stock: 35, emoji: '💧', description: 'Botella de 500 ml sin gas.', active: true },
-      { id: 6, name: 'Gaseosa', categoryId: 2, priceCents: 140000, stock: 25, emoji: '🥤', description: 'Botella de 500 ml.', active: true },
-      { id: 7, name: 'Jugo natural', categoryId: 2, priceCents: 110000, stock: 20, emoji: '🧃', description: 'Jugo de frutas en cajita.', active: true },
-      { id: 8, name: 'Chocolatada', categoryId: 2, priceCents: 130000, stock: 18, emoji: '🥛', description: 'Leche chocolatada de 200 ml.', active: true },
-      { id: 9, name: 'Papas fritas', categoryId: 3, priceCents: 160000, stock: 22, emoji: '🍟', description: 'Bolsa de papas fritas clásicas.', active: true },
-      { id: 10, name: 'Palitos salados', categoryId: 3, priceCents: 80000, stock: 30, emoji: '🥨', description: 'Palitos de queso.', active: true },
-      { id: 11, name: 'Chizitos', categoryId: 3, priceCents: 90000, stock: 28, emoji: '🧀', description: 'Snack de maíz sabor queso.', active: true },
-      { id: 12, name: 'Medialuna', categoryId: 4, priceCents: 60000, stock: 24, emoji: '🥐', description: 'Medialuna de manteca.', active: true },
-      { id: 13, name: 'Sandwich', categoryId: 4, priceCents: 180000, stock: 12, emoji: '🥪', description: 'Sandwich de jamón y queso.', active: true },
-      { id: 14, name: 'Bizcochuelo', categoryId: 4, priceCents: 100000, stock: 15, emoji: '🍰', description: 'Porción de bizcochuelo casero.', active: true },
-      { id: 15, name: 'Palito de agua', categoryId: 5, priceCents: 80000, stock: 26, emoji: '🍧', description: 'Helado de agua sabor limón.', active: true },
-      { id: 16, name: 'Helado de crema', categoryId: 5, priceCents: 150000, stock: 16, emoji: '🍦', description: 'Cucurucho de crema americana.', active: true }
+      { id: 1, name: 'Alfajor triple', categoryId: 1, priceCents: 150000, stock: 40, emoji: '', description: 'Alfajor de chocolate relleno con dulce de leche.', active: true },
+      { id: 2, name: 'Chocolate', categoryId: 1, priceCents: 120000, stock: 30, emoji: '', description: 'Barra de chocolate con leche.', active: true },
+      { id: 3, name: 'Chicles', categoryId: 1, priceCents: 50000, stock: 60, emoji: '', description: 'Chicles de menta, caja chica.', active: true },
+      { id: 4, name: 'Caramelos', categoryId: 1, priceCents: 30000, stock: 80, emoji: '', description: 'Caramelos surtidos.', active: true },
+      { id: 5, name: 'Agua mineral', categoryId: 2, priceCents: 90000, stock: 35, emoji: '', description: 'Botella de 500 ml sin gas.', active: true },
+      { id: 6, name: 'Gaseosa', categoryId: 2, priceCents: 140000, stock: 25, emoji: '', description: 'Botella de 500 ml.', active: true },
+      { id: 7, name: 'Jugo natural', categoryId: 2, priceCents: 110000, stock: 20, emoji: '', description: 'Jugo de frutas en cajita.', active: true },
+      { id: 8, name: 'Chocolatada', categoryId: 2, priceCents: 130000, stock: 18, emoji: '', description: 'Leche chocolatada de 200 ml.', active: true },
+      { id: 9, name: 'Papas fritas', categoryId: 3, priceCents: 160000, stock: 22, emoji: '', description: 'Bolsa de papas fritas clásicas.', active: true },
+      { id: 10, name: 'Palitos salados', categoryId: 3, priceCents: 80000, stock: 30, emoji: '', description: 'Palitos de queso.', active: true },
+      { id: 11, name: 'Chizitos', categoryId: 3, priceCents: 90000, stock: 28, emoji: '', description: 'Snack de maíz sabor queso.', active: true },
+      { id: 12, name: 'Medialuna', categoryId: 4, priceCents: 60000, stock: 24, emoji: '', description: 'Medialuna de manteca.', active: true },
+      { id: 13, name: 'Sandwich', categoryId: 4, priceCents: 180000, stock: 12, emoji: '', description: 'Sandwich de jamón y queso.', active: true },
+      { id: 14, name: 'Bizcochuelo', categoryId: 4, priceCents: 100000, stock: 15, emoji: '', description: 'Porción de bizcochuelo casero.', active: true },
+      { id: 15, name: 'Palito de agua', categoryId: 5, priceCents: 80000, stock: 26, emoji: '', description: 'Helado de agua sabor limón.', active: true },
+      { id: 16, name: 'Helado de crema', categoryId: 5, priceCents: 150000, stock: 16, emoji: '', description: 'Cucurucho de crema americana.', active: true }
     ],
     recreos: [
       { id: 1, name: 'Primer recreo', startTime: '09:30', endTime: '09:45', active: true, sortOrder: 1 },
@@ -389,7 +389,7 @@ const localBackend = {
         categoryId: Number(payload.categoryId) || null,
         priceCents: Number(payload.priceCents) || 0,
         stock: Number(payload.stock) || 0,
-        emoji: payload.emoji || '🥪',
+        emoji: payload.emoji || '',
         active: payload.active !== undefined ? Boolean(payload.active) : true,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
@@ -448,7 +448,7 @@ const localBackend = {
       const newCat = {
         id: db.categoriesSeq++,
         name: String(payload.name).trim(),
-        emoji: payload.emoji || '📦',
+        emoji: payload.emoji || '',
         sortOrder: Number(payload.sortOrder) || db.categories.length + 1
       };
       db.categories.push(newCat);

@@ -18,7 +18,7 @@ server.on('error', (error) => {
 server.listen(config.port, config.host, () => {
   const url = `http://${config.host === '0.0.0.0' ? '127.0.0.1' : config.host}:${config.port}`;
   console.log('');
-  console.log('  🥪  Kiosco del Recreo');
+  console.log('    Kiosco del Recreo');
   console.log('  ────────────────────────────────────────────');
   console.log(`  Servidor:   ${url}`);
   console.log(`  Base datos: ${config.dbPath}`);

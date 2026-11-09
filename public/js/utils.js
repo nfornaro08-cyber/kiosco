@@ -53,11 +53,11 @@ export function formatLongDate(isoDate) {
 }
 
 export const STATUS_META = {
-  pendiente: { label: 'Pendiente', tone: 'amber', icon: '⏳', step: 1 },
-  preparando: { label: 'En preparación', tone: 'blue', icon: '👩‍🍳', step: 2 },
-  listo: { label: 'Listo para retirar', tone: 'green', icon: '✅', step: 3 },
-  entregado: { label: 'Entregado', tone: 'slate', icon: '🎉', step: 4 },
-  cancelado: { label: 'Cancelado', tone: 'red', icon: '✕', step: 0 },
+  pendiente: { label: 'Pendiente', tone: 'amber', icon: '', step: 1 },
+  preparando: { label: 'En preparación', tone: 'blue', icon: '‍', step: 2 },
+  listo: { label: 'Listo para retirar', tone: 'green', icon: '', step: 3 },
+  entregado: { label: 'Entregado', tone: 'slate', icon: '', step: 4 },
+  cancelado: { label: 'Cancelado', tone: 'red', icon: '', step: 0 },
 };
 
 export function statusBadge(status) {

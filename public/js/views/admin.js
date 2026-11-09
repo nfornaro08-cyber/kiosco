@@ -22,12 +22,12 @@ import {
 } from '../utils.js';
 
 const TABS = [
-  { id: 'resumen', label: 'Resumen', icon: '📊' },
-  { id: 'productos', label: 'Productos', icon: '🍫' },
-  { id: 'pedidos', label: 'Pedidos', icon: '🧾' },
-  { id: 'recreos', label: 'Recreos', icon: '⏰' },
-  { id: 'categorias', label: 'Categorías', icon: '🏷️' },
-  { id: 'usuarios', label: 'Usuarios', icon: '👥' },
+  { id: 'resumen', label: 'Resumen', icon: '' },
+  { id: 'productos', label: 'Productos', icon: '' },
+  { id: 'pedidos', label: 'Pedidos', icon: '' },
+  { id: 'recreos', label: 'Recreos', icon: '' },
+  { id: 'categorias', label: 'Categorías', icon: '' },
+  { id: 'usuarios', label: 'Usuarios', icon: '' },
 ];
 
 const filters = {
@@ -82,7 +82,7 @@ export async function renderAdmin(app, container, activeTab = 'resumen') {
     <section class="admin">
       <aside class="admin-side">
         <div class="admin-brand">
-          <span class="admin-brand-icon">🧑‍💼</span>
+          <span class="admin-brand-icon">‍</span>
           <div>
             <strong>Administración</strong>
             <small>Kiosco del Recreo</small>
@@ -147,10 +147,10 @@ async function paintResumen(main, app) {
       </header>
 
       <div class="stat-grid">
-        ${statCard('Pedidos de hoy', stats.ordersToday, '🧾', `${stats.byStatus.pendiente.count} pendientes`)}
-        ${statCard('En curso', stats.activeOrders, '⏳', 'para preparar o retirar')}
-        ${statCard('Recaudado hoy', money(stats.deliveredTodayCents), '💰', 'pedidos entregados')}
-        ${statCard('Stock bajo', stats.lowStock.length, '📦', 'productos con 5 o menos')}
+        ${statCard('Pedidos de hoy', stats.ordersToday, '', `${stats.byStatus.pendiente.count} pendientes`)}
+        ${statCard('En curso', stats.activeOrders, '', 'para preparar o retirar')}
+        ${statCard('Recaudado hoy', money(stats.deliveredTodayCents), '', 'pedidos entregados')}
+        ${statCard('Stock bajo', stats.lowStock.length, '', 'productos con 5 o menos')}
       </div>
 
       <div class="admin-grid">
@@ -180,7 +180,7 @@ async function paintResumen(main, app) {
                     </tbody>
                   </table>
                 </div>`
-              : emptyState({ icon: '🧾', title: 'Sin pedidos por ahora', text: 'Los pedidos de hoy van a aparecer acá.' })
+              : emptyState({ icon: '', title: 'Sin pedidos por ahora', text: 'Los pedidos de hoy van a aparecer acá.' })
           }
         </section>
 
@@ -204,7 +204,7 @@ async function paintResumen(main, app) {
                     })
                     .join('')}
                 </ul>`
-              : '<p class="muted">Todo el stock está en orden 👌</p>'
+              : '<p class="muted">Todo el stock está en orden </p>'
           }
         </section>
 
@@ -243,7 +243,7 @@ function productRow(product) {
     <tr>
       <td>
         <div class="cell-product">
-          <span class="cell-emoji">${escapeHtml(product.emoji || '🛒')}</span>
+          <span class="cell-emoji">${escapeHtml(product.emoji || '')}</span>
           <div>
             <strong>${escapeHtml(product.name)}</strong>
             <small>${escapeHtml(product.description || 'Sin descripción')}</small>
@@ -287,7 +287,7 @@ async function paintProductos(main, app) {
       <div class="panel">
         <div class="panel-toolbar">
           <label class="search-field">
-            <span aria-hidden="true">🔎</span>
+            <span aria-hidden="true"></span>
             <input id="admin-product-search" type="search" placeholder="Buscar producto..." value="${escapeHtml(filters.productsSearch)}" />
           </label>
           <span class="toolbar-note" id="product-visible-count"></span>
@@ -325,7 +325,7 @@ async function paintProductos(main, app) {
               <tbody>${visible.map(productRow).join('')}</tbody>
             </table>
           </div>`
-        : emptyState({ icon: '🔍', title: 'Sin resultados', text: 'Probá con otro nombre o creá un producto nuevo.' });
+        : emptyState({ icon: '', title: 'Sin resultados', text: 'Probá con otro nombre o creá un producto nuevo.' });
     }
 
     paintRows();
@@ -352,14 +352,14 @@ function adminOrderCard(order) {
           <span class="admin-order-date">${escapeHtml(formatDateTime(order.createdAt))}</span>
         </div>
         <p class="admin-order-user">
-          👤 <strong>${escapeHtml(order.userName ?? 'Alumno')}</strong>
+           <strong>${escapeHtml(order.userName ?? 'Alumno')}</strong>
           <span>${escapeHtml(order.userEmail ?? '')}</span>
           · ${escapeHtml(order.recreoName ?? '')} ${escapeHtml(order.recreoStartTime ?? '')}–${escapeHtml(order.recreoEndTime ?? '')}
         </p>
         <ul class="admin-order-items">
           ${order.items.map((item) => `<li><span>${item.quantity}×</span> ${escapeHtml(item.productName)} <em>${money(item.subtotalCents)}</em></li>`).join('')}
         </ul>
-        ${order.notes ? `<p class="order-notes">📝 ${escapeHtml(order.notes)}</p>` : ''}
+        ${order.notes ? `<p class="order-notes"> ${escapeHtml(order.notes)}</p>` : ''}
       </div>
       <div class="admin-order-side">
         <span class="admin-order-total">${money(order.totalCents)}</span>
@@ -445,7 +445,7 @@ async function paintPedidos(main, app) {
             orders.length
               ? orders.map(adminOrderCard).join('')
               : emptyState({
-                  icon: '🧾',
+                  icon: '',
                   title: 'No hay pedidos con esos filtros',
                   text: 'Probá cambiando la fecha o el estado.',
                 })
@@ -482,7 +482,7 @@ async function paintRecreos(main, app) {
                   (recreo) => `
                 <article class="panel recreo-card ${recreo.active ? '' : 'is-inactive'}">
                   <div class="recreo-card-head">
-                    <span class="recreo-clock">⏰</span>
+                    <span class="recreo-clock"></span>
                     ${recreo.active ? '<span class="badge badge-green">Habilitado</span>' : '<span class="badge badge-slate">Deshabilitado</span>'}
                   </div>
                   <h2>${escapeHtml(recreo.name)}</h2>
@@ -499,7 +499,7 @@ async function paintRecreos(main, app) {
                 .join('')}
             </div>`
           : emptyState({
-              icon: '⏰',
+              icon: '',
               title: 'Todavía no hay recreos',
               text: 'Creá al menos un recreo para que los alumnos puedan hacer pedidos.',
               action: '<button type="button" class="btn btn-primary" data-action="new-recreo">Crear recreo</button>',
@@ -548,7 +548,7 @@ async function paintCategorias(main, app) {
                   )
                   .join('')}
               </ul>`
-            : emptyState({ icon: '🏷️', title: 'Sin categorías', text: 'Creá la primera categoría del kiosco.' })
+            : emptyState({ icon: '', title: 'Sin categorías', text: 'Creá la primera categoría del kiosco.' })
         }
       </div>
     `;
@@ -811,7 +811,7 @@ async function openProductModal(app, product, onSaved) {
           </div>
           <div class="field">
             <label for="p-emoji">Emoji</label>
-            <input id="p-emoji" name="emoji" maxlength="8" value="${escapeHtml(product?.emoji ?? '🛒')}" />
+            <input id="p-emoji" name="emoji" maxlength="8" value="${escapeHtml(product?.emoji ?? '')}" />
           </div>
         </div>
 
@@ -885,7 +885,7 @@ async function openProductModal(app, product, onSaved) {
 
     const payload = {
       name: form.name.value.trim(),
-      emoji: form.emoji.value.trim() || '🛒',
+      emoji: form.emoji.value.trim() || '',
       categoryId: form.categoryId.value ? Number(form.categoryId.value) : null,
       priceCents: Math.round(priceNumber * 100),
       stock: stockNumber,
@@ -927,7 +927,7 @@ async function openCategoryModal(app, category, onSaved) {
           </div>
           <div class="field">
             <label for="c-emoji">Emoji</label>
-            <input id="c-emoji" name="emoji" maxlength="8" value="${escapeHtml(category?.emoji ?? '🍬')}" />
+            <input id="c-emoji" name="emoji" maxlength="8" value="${escapeHtml(category?.emoji ?? '')}" />
           </div>
         </div>
         <div class="field">
@@ -950,7 +950,7 @@ async function openCategoryModal(app, category, onSaved) {
     const submitButton = modal.root.querySelector('[type="submit"]');
     const payload = {
       name: form.name.value.trim(),
-      emoji: form.emoji.value.trim() || '🍬',
+      emoji: form.emoji.value.trim() || '',
       sortOrder: Number(form.sortOrder.value) || 0,
     };
 

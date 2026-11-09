@@ -45,7 +45,7 @@ export function createProductRepository(db) {
       return map(db.prepare(`${BASE_SELECT} WHERE p.id = ?`).get(id));
     },
 
-    create({ name, description = '', categoryId = null, priceCents, stock, emoji = '🛒', active = true }) {
+    create({ name, description = '', categoryId = null, priceCents, stock, emoji = '', active = true }) {
       const now = new Date().toISOString();
       const result = db
         .prepare(
@@ -56,7 +56,7 @@ export function createProductRepository(db) {
       return this.findById(Number(result.lastInsertRowid));
     },
 
-    update(id, { name, description = '', categoryId = null, priceCents, stock, emoji = '🛒', active = true }) {
+    update(id, { name, description = '', categoryId = null, priceCents, stock, emoji = '', active = true }) {
       const now = new Date().toISOString();
       db.prepare(
         `UPDATE products

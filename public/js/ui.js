@@ -5,7 +5,7 @@ export function toast(message, tone = 'success', timeout = 4000) {
   if (!host) return;
   const element = document.createElement('div');
   element.className = `toast toast-${tone}`;
-  element.innerHTML = `<span class="toast-icon">${tone === 'success' ? '✓' : tone === 'error' ? '!' : 'i'}</span><span class="toast-text">${escapeHtml(message)}</span>`;
+  element.innerHTML = `<span class="toast-icon">${tone === 'success' ? '' : tone === 'error' ? '!' : 'i'}</span><span class="toast-text">${escapeHtml(message)}</span>`;
   host.appendChild(element);
   requestAnimationFrame(() => element.classList.add('is-visible'));
   setTimeout(() => {
@@ -25,7 +25,7 @@ export function openModal({ title, subtitle = '', content = '', footer = '', siz
           <h2>${escapeHtml(title)}</h2>
           ${subtitle ? `<p class="modal-subtitle">${escapeHtml(subtitle)}</p>` : ''}
         </div>
-        <button type="button" class="icon-btn" data-close aria-label="Cerrar">✕</button>
+        <button type="button" class="icon-btn" data-close aria-label="Cerrar"></button>
       </header>
       <div class="modal-body">${content}</div>
       ${footer ? `<footer class="modal-foot">${footer}</footer>` : ''}
@@ -112,7 +112,7 @@ export function spinnerBlock(text = 'Cargando...') {
   `;
 }
 
-export function emptyState({ icon = '🧺', title = 'Nada por aquí', text = '', action = '' } = {}) {
+export function emptyState({ icon = '', title = 'Nada por aquí', text = '', action = '' } = {}) {
   return `
     <div class="empty-state">
       <span class="empty-icon">${icon}</span>
@@ -126,7 +126,7 @@ export function emptyState({ icon = '🧺', title = 'Nada por aquí', text = '',
 export function errorBlock(message, retryAction = 'retry') {
   return `
     <div class="error-block">
-      <span class="empty-icon">⚠️</span>
+      <span class="empty-icon"></span>
       <h3>Algo salió mal</h3>
       <p>${escapeHtml(message)}</p>
       <button class="btn btn-primary" data-action="${retryAction}">Reintentar</button>

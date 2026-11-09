@@ -24,7 +24,7 @@ CREATE INDEX IF NOT EXISTS idx_sessions_user ON sessions(user_id);
 CREATE TABLE IF NOT EXISTS categories (
   id         INTEGER PRIMARY KEY AUTOINCREMENT,
   name       TEXT    NOT NULL UNIQUE COLLATE NOCASE,
-  emoji      TEXT    NOT NULL DEFAULT '🍬',
+  emoji      TEXT    NOT NULL DEFAULT '',
   sort_order INTEGER NOT NULL DEFAULT 0,
   created_at TEXT    NOT NULL
 );
@@ -36,7 +36,7 @@ CREATE TABLE IF NOT EXISTS products (
   category_id INTEGER REFERENCES categories(id) ON DELETE SET NULL,
   price_cents INTEGER NOT NULL CHECK (price_cents >= 0),
   stock       INTEGER NOT NULL DEFAULT 0 CHECK (stock >= 0),
-  emoji       TEXT    NOT NULL DEFAULT '🛒',
+  emoji       TEXT    NOT NULL DEFAULT '',
   active      INTEGER NOT NULL DEFAULT 1 CHECK (active IN (0, 1)),
   created_at  TEXT    NOT NULL,
   updated_at  TEXT    NOT NULL

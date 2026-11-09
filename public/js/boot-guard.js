@@ -46,7 +46,7 @@
     if (!view || !document.querySelector('.boot-screen')) return;
     view.innerHTML =
       '<div class="error-block">' +
-      '<span class="empty-icon">⚠️</span>' +
+      '<span class="empty-icon"></span>' +
       '<h3>' +
       title +
       '</h3>' +

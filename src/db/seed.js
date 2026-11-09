@@ -7,30 +7,30 @@ import { config } from '../config.js';
 import { openDatabase, applySchema, closeDatabase } from './database.js';
 
 const DEFAULT_CATEGORIES = [
-  { name: 'Golosinas', emoji: '🍬', sortOrder: 1 },
-  { name: 'Bebidas', emoji: '🥤', sortOrder: 2 },
-  { name: 'Salados', emoji: '🥨', sortOrder: 3 },
-  { name: 'Panadería', emoji: '🥐', sortOrder: 4 },
-  { name: 'Helados', emoji: '🍦', sortOrder: 5 },
+  { name: 'Golosinas', emoji: '', sortOrder: 1 },
+  { name: 'Bebidas', emoji: '', sortOrder: 2 },
+  { name: 'Salados', emoji: '', sortOrder: 3 },
+  { name: 'Panadería', emoji: '', sortOrder: 4 },
+  { name: 'Helados', emoji: '', sortOrder: 5 },
 ];
 
 const DEFAULT_PRODUCTS = [
-  { name: 'Alfajor triple', category: 'Golosinas', priceCents: 150000, stock: 40, emoji: '🍫', description: 'Alfajor de chocolate relleno con dulce de leche.' },
-  { name: 'Chocolate', category: 'Golosinas', priceCents: 120000, stock: 30, emoji: '🍫', description: 'Barra de chocolate con leche.' },
-  { name: 'Chicles', category: 'Golosinas', priceCents: 50000, stock: 60, emoji: '🍬', description: 'Chicles de menta, caja chica.' },
-  { name: 'Caramelos', category: 'Golosinas', priceCents: 30000, stock: 80, emoji: '🍬', description: 'Caramelos surtidos.' },
-  { name: 'Agua mineral', category: 'Bebidas', priceCents: 90000, stock: 35, emoji: '💧', description: 'Botella de 500 ml sin gas.' },
-  { name: 'Gaseosa', category: 'Bebidas', priceCents: 140000, stock: 25, emoji: '🥤', description: 'Botella de 500 ml.' },
-  { name: 'Jugo natural', category: 'Bebidas', priceCents: 110000, stock: 20, emoji: '🧃', description: 'Jugo de frutas en cajita.' },
-  { name: 'Chocolatada', category: 'Bebidas', priceCents: 130000, stock: 18, emoji: '🥛', description: 'Leche chocolatada de 200 ml.' },
-  { name: 'Papas fritas', category: 'Salados', priceCents: 160000, stock: 22, emoji: '🍟', description: 'Bolsa de papas fritas clásicas.' },
-  { name: 'Palitos salados', category: 'Salados', priceCents: 80000, stock: 30, emoji: '🥨', description: 'Palitos de queso.' },
-  { name: 'Chizitos', category: 'Salados', priceCents: 90000, stock: 28, emoji: '🧀', description: 'Snack de maíz sabor queso.' },
-  { name: 'Medialuna', category: 'Panadería', priceCents: 60000, stock: 24, emoji: '🥐', description: 'Medialuna de manteca.' },
-  { name: 'Sandwich', category: 'Panadería', priceCents: 180000, stock: 12, emoji: '🥪', description: 'Sandwich de jamón y queso.' },
-  { name: 'Bizcochuelo', category: 'Panadería', priceCents: 100000, stock: 15, emoji: '🍰', description: 'Porción de bizcochuelo casero.' },
-  { name: 'Palito de agua', category: 'Helados', priceCents: 80000, stock: 26, emoji: '🍧', description: 'Helado de agua sabor limón.' },
-  { name: 'Helado de crema', category: 'Helados', priceCents: 150000, stock: 16, emoji: '🍦', description: 'Cucurucho de crema americana.' },
+  { name: 'Alfajor triple', category: 'Golosinas', priceCents: 150000, stock: 40, emoji: '', description: 'Alfajor de chocolate relleno con dulce de leche.' },
+  { name: 'Chocolate', category: 'Golosinas', priceCents: 120000, stock: 30, emoji: '', description: 'Barra de chocolate con leche.' },
+  { name: 'Chicles', category: 'Golosinas', priceCents: 50000, stock: 60, emoji: '', description: 'Chicles de menta, caja chica.' },
+  { name: 'Caramelos', category: 'Golosinas', priceCents: 30000, stock: 80, emoji: '', description: 'Caramelos surtidos.' },
+  { name: 'Agua mineral', category: 'Bebidas', priceCents: 90000, stock: 35, emoji: '', description: 'Botella de 500 ml sin gas.' },
+  { name: 'Gaseosa', category: 'Bebidas', priceCents: 140000, stock: 25, emoji: '', description: 'Botella de 500 ml.' },
+  { name: 'Jugo natural', category: 'Bebidas', priceCents: 110000, stock: 20, emoji: '', description: 'Jugo de frutas en cajita.' },
+  { name: 'Chocolatada', category: 'Bebidas', priceCents: 130000, stock: 18, emoji: '', description: 'Leche chocolatada de 200 ml.' },
+  { name: 'Papas fritas', category: 'Salados', priceCents: 160000, stock: 22, emoji: '', description: 'Bolsa de papas fritas clásicas.' },
+  { name: 'Palitos salados', category: 'Salados', priceCents: 80000, stock: 30, emoji: '', description: 'Palitos de queso.' },
+  { name: 'Chizitos', category: 'Salados', priceCents: 90000, stock: 28, emoji: '', description: 'Snack de maíz sabor queso.' },
+  { name: 'Medialuna', category: 'Panadería', priceCents: 60000, stock: 24, emoji: '', description: 'Medialuna de manteca.' },
+  { name: 'Sandwich', category: 'Panadería', priceCents: 180000, stock: 12, emoji: '', description: 'Sandwich de jamón y queso.' },
+  { name: 'Bizcochuelo', category: 'Panadería', priceCents: 100000, stock: 15, emoji: '', description: 'Porción de bizcochuelo casero.' },
+  { name: 'Palito de agua', category: 'Helados', priceCents: 80000, stock: 26, emoji: '', description: 'Helado de agua sabor limón.' },
+  { name: 'Helado de crema', category: 'Helados', priceCents: 150000, stock: 16, emoji: '', description: 'Cucurucho de crema americana.' },
 ];
 
 const DEFAULT_RECREOS = [

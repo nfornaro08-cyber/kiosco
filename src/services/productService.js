@@ -9,7 +9,7 @@ function parseProductInput(input) {
   const categoryId = integer(input.categoryId, 'categoryId', { min: 1, required: false });
   const priceCents = integer(input.priceCents, 'priceCents', { min: 0, max: 100_000_000 });
   const stock = integer(input.stock, 'stock', { min: 0, max: 100_000 });
-  const emoji = text(input.emoji, 'emoji', { required: false, max: 8 }) ?? '🛒';
+  const emoji = text(input.emoji, 'emoji', { required: false, max: 8 }) ?? '';
   const active = input.active === undefined ? true : boolean(input.active, 'active');
   return { name, description, categoryId, priceCents, stock, emoji, active };
 }

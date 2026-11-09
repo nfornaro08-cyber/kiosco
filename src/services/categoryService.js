@@ -5,7 +5,7 @@ import { createCategoryRepository } from '../repositories/categoryRepository.js'
 function parseCategoryInput(input) {
   return {
     name: text(input.name, 'name', { min: 2, max: 40 }),
-    emoji: text(input.emoji, 'emoji', { required: false, max: 8 }) ?? '🍬',
+    emoji: text(input.emoji, 'emoji', { required: false, max: 8 }) ?? '',
     sortOrder: input.sortOrder === undefined ? 0 : integer(input.sortOrder, 'sortOrder', { min: 0, max: 999 }),
   };
 }

@@ -33,7 +33,7 @@ export function createCategoryRepository(db) {
       return map(db.prepare('SELECT * FROM categories WHERE name = ? COLLATE NOCASE').get(name));
     },
 
-    create({ name, emoji = '🍬', sortOrder = 0, createdAt = new Date().toISOString() }) {
+    create({ name, emoji = '', sortOrder = 0, createdAt = new Date().toISOString() }) {
       const result = db
         .prepare('INSERT INTO categories (name, emoji, sort_order, created_at) VALUES (?, ?, ?, ?)')
         .run(name, emoji, sortOrder, createdAt);
