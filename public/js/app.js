@@ -39,6 +39,7 @@ const app = {
     catalogLoading: false,
     catalogFilters: { search: '', categoryId: null },
     cart: normalizeCart(readStorage(CART_KEY, [])),
+    paymentMethod: 'mercadopago',
     recreoId: Number(localStorage.getItem(RECREO_KEY)) || null,
     notes: localStorage.getItem(NOTES_KEY) ?? '',
     cartOpen: false,
@@ -559,6 +560,19 @@ const app = {
             }</p>
           </div>
 
+          <div class="cart-payment">
+            <label for="cart-payment-method">Forma de pago</label>
+            <select id="cart-payment-method">
+              <option value="mercadopago" ${this.state.paymentMethod === 'mercadopago' ? 'selected' : ''}>Mercado Pago (tarjeta/online)</option>
+              <option value="cash" ${this.state.paymentMethod === 'cash' ? 'selected' : ''}>Efectivo al retirar</option>
+            </select>
+            <p class="cart-hint">${
+              this.state.paymentMethod === 'cash'
+                ? 'Pagás en efectivo al retirar el pedido en el kiosco.'
+                : 'Se abre el checkout de Mercado Pago para pagar online.'
+            }</p>
+          </div>
+
           <div class="cart-items">${itemsHtml}</div>
 
           <div class="cart-notes">
@@ -611,6 +625,7 @@ const app = {
       const { order } = await api.createOrder({
         recreoId: recreo.id,
         notes: this.state.notes.trim(),
+        paymentMethod: this.state.paymentMethod,
         items: lines.map((line) => ({ productId: line.productId, quantity: line.quantity })),
       });
 
@@ -687,6 +702,10 @@ const app = {
       if (event.target.id === 'cart-recreo') {
         this.state.recreoId = Number(event.target.value) || null;
         this.persistRecreo();
+        this.renderCart();
+      }
+      if (event.target.id === 'cart-payment-method') {
+        this.state.paymentMethod = event.target.value;
         this.renderCart();
       }
     });

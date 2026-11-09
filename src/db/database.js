@@ -29,6 +29,9 @@ export function applySchema(db) {
   if (!columns.includes('payment_status')) {
     db.exec("ALTER TABLE orders ADD COLUMN payment_status TEXT NOT NULL DEFAULT 'unpaid';");
   }
+  if (!columns.includes('payment_method')) {
+    db.exec("ALTER TABLE orders ADD COLUMN payment_method TEXT NOT NULL DEFAULT 'mercadopago';");
+  }
 }
 
 export function closeDatabase(db) {

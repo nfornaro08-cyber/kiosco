@@ -24,6 +24,7 @@ export function registerOrderRoutes(routes, ctx) {
         recreoId: body.recreoId,
         items: body.items,
         notes: body.notes,
+        paymentMethod: body.paymentMethod,
       });
       sendJson(res, 201, { order });
     },

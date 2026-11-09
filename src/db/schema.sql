@@ -64,6 +64,8 @@ CREATE TABLE IF NOT EXISTS orders (
                  CHECK (status IN ('pendiente', 'preparando', 'listo', 'entregado', 'cancelado')),
   payment_status TEXT    NOT NULL DEFAULT 'unpaid'
                  CHECK (payment_status IN ('unpaid', 'pending', 'approved', 'rejected', 'cancelled', 'refunded')),
+  payment_method TEXT    NOT NULL DEFAULT 'mercadopago'
+                 CHECK (payment_method IN ('cash', 'mercadopago')),
   total_cents    INTEGER NOT NULL CHECK (total_cents >= 0),
   notes          TEXT    NOT NULL DEFAULT '',
   stock_restored INTEGER NOT NULL DEFAULT 0 CHECK (stock_restored IN (0, 1)),

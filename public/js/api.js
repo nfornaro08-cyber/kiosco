@@ -261,7 +261,7 @@ const localBackend = {
     return { orders };
   },
 
-  createOrder({ recreoId, items, notes }) {
+  createOrder({ recreoId, items, notes, paymentMethod }) {
     const session = getLocalSession();
     if (!session) throw new ApiError('Iniciá sesión para hacer un pedido.', { status: 401 });
     const db = loadLocalDb();
@@ -312,6 +312,7 @@ const localBackend = {
       recreoEndTime: recreo.endTime,
       serviceDate: new Date().toISOString().slice(0, 10),
       status: 'pendiente',
+paymentMethod: paymentMethod || 'mercadopago',
       totalCents,
       notes: notes ? String(notes).trim() : '',
       stockRestored: false,
@@ -763,6 +764,8 @@ export const api = {
     getOrders: (params = {}) => request(`/admin/orders${toQuery(params)}`),
     updateOrderStatus: (id, status) =>
       request(`/admin/orders/${id}/status`, { method: 'PATCH', body: { status } }),
+    updatePaymentStatus: (id, status) =>
+      request(`/admin/orders/${id}/payment`, { method: 'PATCH', body: { status } }),
 
     getStats: () => request('/admin/stats'),
     getUsers: () => request('/admin/users'),

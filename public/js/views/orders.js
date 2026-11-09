@@ -68,9 +68,11 @@ function renderOrderCard(order) {
               : ''
           }
           ${
-            order.status === 'pendiente' && (!order.paymentStatus || order.paymentStatus === 'unpaid' || order.paymentStatus === 'rejected')
-              ? `<button type="button" class="btn btn-primary btn-sm" data-action="pay-order" data-id="${order.id}">Pagar</button>`
-              : ''
+            order.paymentMethod === 'cash'
+              ? `<span class="badge badge-plain">Pago en efectivo</span>`
+              : order.status === 'pendiente' && (!order.paymentStatus || order.paymentStatus === 'unpaid' || order.paymentStatus === 'rejected')
+                ? `<button type="button" class="btn btn-primary btn-sm" data-action="pay-order" data-id="${order.id}">Pagar</button>`
+                : ''
           }
           ${
             order.status === 'pendiente'

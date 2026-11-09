@@ -375,6 +375,11 @@ function adminOrderCard(order) {
               ? `<button type="button" class="btn btn-ghost btn-sm danger-text" data-action="admin-status" data-id="${order.id}" data-status="cancelado">Cancelar</button>`
               : ''
           }
+          ${
+            order.paymentMethod === 'cash' && order.paymentStatus !== 'approved'
+              ? `<button type="button" class="btn btn-soft btn-sm" data-action="mark-paid" data-id="${order.id}">Marcar pagado</button>`
+              : ''
+          }
         </div>
       </div>
     </article>
@@ -717,6 +722,14 @@ async function handleAdminClick(event, { app, main, tab }) {
       if (!confirmed) return;
       const result = await api.admin.deleteRecreo(id);
       toast(result.archived ? 'El recreo se deshabilitó porque tiene pedidos asociados.' : 'Recreo eliminado.');
+      await app.loadCatalog();
+      await repaint();
+      return;
+    }
+
+    case 'mark-paid': {
+      await api.admin.updatePaymentStatus(id, 'approved');
+      toast('Pago marcado como recibido.');
       await app.loadCatalog();
       await repaint();
       return;

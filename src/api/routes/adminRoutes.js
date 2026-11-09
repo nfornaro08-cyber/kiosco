@@ -160,6 +160,16 @@ export function registerAdminRoutes(routes, ctx) {
   });
 
   routes.push({
+    method: 'PATCH',
+    path: '/api/admin/orders/:id/payment',
+    handler: async (req, res, { params }) => {
+      admin(req);
+      const body = await readJsonBody(req);
+      sendJson(res, 200, { order: orders.updatePaymentStatus(params.id, body.status) });
+    },
+  });
+
+  routes.push({
     method: 'GET',
     path: '/api/admin/stats',
     handler: async (req, res) => {

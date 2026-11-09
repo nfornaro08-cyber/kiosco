@@ -61,9 +61,10 @@ export function createOrderService({ db, config }) {
   }
 
   /** Crea el pedido, valida stock y descuenta existencias en una sola transaccion. */
-  function create({ userId, recreoId, items, notes }) {
+  function create({ userId, recreoId, items, notes, paymentMethod = 'mercadopago' }) {
     const cleanRecreoId = integer(recreoId, 'recreoId', { min: 1 });
     const cleanNotes = text(notes, 'notes', { required: false, max: 200 }) ?? '';
+    const cleanPaymentMethod = oneOf(paymentMethod ?? 'mercadopago', 'paymentMethod', ['cash', 'mercadopago']);
     const lines = parseOrderItems(items);
     const serviceDate = localDateISO(new Date(), config.timeZone);
 
@@ -114,6 +115,7 @@ export function createOrderService({ db, config }) {
             serviceDate,
             totalCents,
             notes: cleanNotes,
+            paymentMethod: cleanPaymentMethod,
           });
         } catch (error) {
           if (!String(error?.message ?? '').includes('UNIQUE')) throw error;
@@ -192,6 +194,14 @@ export function createOrderService({ db, config }) {
     return transaction.immediate();
   }
 
+  function updatePaymentStatus(orderId, paymentStatus) {
+    const id = integer(orderId, 'orderId', { min: 1 });
+    const status = oneOf(paymentStatus, 'paymentStatus', ['unpaid', 'pending', 'approved', 'rejected', 'cancelled', 'refunded']);
+    const order = orders.findById(id);
+    if (!order) throw AppError.notFound('ORDER_NOT_FOUND', 'El pedido no existe.');
+    return orders.updatePaymentStatus(id, status);
+  }
+
   function listAdmin({ status = null, recreoId = null, serviceDate = null, limit = 200 } = {}) {
     const filters = { limit: integer(limit, 'limit', { min: 1, max: 500 }) };
     if (status) filters.status = oneOf(status, 'status', ORDER_STATUSES);
@@ -236,6 +246,7 @@ export function createOrderService({ db, config }) {
     listAdmin,
     cancel,
     updateStatus,
+    updatePaymentStatus,
     getStats,
   };
 }

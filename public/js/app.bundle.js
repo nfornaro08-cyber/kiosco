@@ -234,7 +234,7 @@ var localBackend = {
     orders.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
     return { orders };
   },
-  createOrder({ recreoId, items, notes }) {
+  createOrder({ recreoId, items, notes, paymentMethod }) {
     const session = getLocalSession();
     if (!session)
       throw new ApiError("Iniciá sesión para hacer un pedido.", { status: 401 });
@@ -282,6 +282,7 @@ var localBackend = {
       recreoEndTime: recreo.endTime,
       serviceDate: new Date().toISOString().slice(0, 10),
       status: "pendiente",
+      paymentMethod: paymentMethod || "mercadopago",
       totalCents,
       notes: notes ? String(notes).trim() : "",
       stockRestored: false,
@@ -718,6 +719,7 @@ var api = {
     deleteRecreo: (id) => request(`/admin/recreos/${id}`, { method: "DELETE" }),
     getOrders: (params = {}) => request(`/admin/orders${toQuery(params)}`),
     updateOrderStatus: (id, status) => request(`/admin/orders/${id}/status`, { method: "PATCH", body: { status } }),
+    updatePaymentStatus: (id, status) => request(`/admin/orders/${id}/payment`, { method: "PATCH", body: { status } }),
     getStats: () => request("/admin/stats"),
     getUsers: () => request("/admin/users")
   }
@@ -1329,7 +1331,7 @@ function renderOrderCard(order) {
         <div class="order-actions">
           <span class="order-time">Creado ${escapeHtml(formatDateTime(order.createdAt))}</span>
           ${order.paymentStatus && order.paymentStatus !== "unpaid" ? `<span class="badge badge-plain">Pago: ${escapeHtml(order.paymentStatus)}</span>` : ""}
-          ${order.status === "pendiente" && (!order.paymentStatus || order.paymentStatus === "unpaid" || order.paymentStatus === "rejected") ? `<button type="button" class="btn btn-primary btn-sm" data-action="pay-order" data-id="${order.id}">Pagar</button>` : ""}
+          ${order.paymentMethod === "cash" ? `<span class="badge badge-plain">Pago en efectivo</span>` : order.status === "pendiente" && (!order.paymentStatus || order.paymentStatus === "unpaid" || order.paymentStatus === "rejected") ? `<button type="button" class="btn btn-primary btn-sm" data-action="pay-order" data-id="${order.id}">Pagar</button>` : ""}
           ${order.status === "pendiente" ? `<button type="button" class="btn btn-ghost btn-sm" data-action="cancel-order" data-id="${order.id}">Cancelar pedido</button>` : ""}
         </div>
       </footer>
@@ -1665,6 +1667,7 @@ function adminOrderCard(order) {
         <div class="admin-order-actions">
           ${actions.map((action) => `<button type="button" class="btn ${action.className} btn-sm" data-action="admin-status" data-id="${order.id}" data-status="${action.status}">${escapeHtml(action.label)}</button>`).join("")}
           ${canCancel ? `<button type="button" class="btn btn-ghost btn-sm danger-text" data-action="admin-status" data-id="${order.id}" data-status="cancelado">Cancelar</button>` : ""}
+          ${order.paymentMethod === "cash" && order.paymentStatus !== "approved" ? `<button type="button" class="btn btn-soft btn-sm" data-action="mark-paid" data-id="${order.id}">Marcar pagado</button>` : ""}
         </div>
       </div>
     </article>
@@ -1946,6 +1949,13 @@ async function handleAdminClick(event, { app, main, tab }) {
         return;
       const result = await api.admin.deleteRecreo(id);
       toast(result.archived ? "El recreo se deshabilitó porque tiene pedidos asociados." : "Recreo eliminado.");
+      await app.loadCatalog();
+      await repaint();
+      return;
+    }
+    case "mark-paid": {
+      await api.admin.updatePaymentStatus(id, "approved");
+      toast("Pago marcado como recibido.");
       await app.loadCatalog();
       await repaint();
       return;
@@ -2285,6 +2295,7 @@ var app = {
     catalogLoading: false,
     catalogFilters: { search: "", categoryId: null },
     cart: normalizeCart(readStorage(CART_KEY, [])),
+    paymentMethod: "mercadopago",
     recreoId: Number(localStorage.getItem(RECREO_KEY)) || null,
     notes: localStorage.getItem(NOTES_KEY) ?? "",
     cartOpen: false,
@@ -2714,6 +2725,15 @@ var app = {
             <p class="cart-hint">${recreo ? `Retirás en ${escapeHtml(recreo.name)} (${escapeHtml(recreo.startTime)}–${escapeHtml(recreo.endTime)}).` : "Elegí un recreo para poder confirmar el pedido."}</p>
           </div>
 
+          <div class="cart-payment">
+            <label for="cart-payment-method">Forma de pago</label>
+            <select id="cart-payment-method">
+              <option value="mercadopago" ${this.state.paymentMethod === "mercadopago" ? "selected" : ""}>Mercado Pago (tarjeta/online)</option>
+              <option value="cash" ${this.state.paymentMethod === "cash" ? "selected" : ""}>Efectivo al retirar</option>
+            </select>
+            <p class="cart-hint">${this.state.paymentMethod === "cash" ? "Pagás en efectivo al retirar el pedido en el kiosco." : "Se abre el checkout de Mercado Pago para pagar online."}</p>
+          </div>
+
           <div class="cart-items">${itemsHtml}</div>
 
           <div class="cart-notes">
@@ -2762,6 +2782,7 @@ var app = {
       const { order } = await api.createOrder({
         recreoId: recreo.id,
         notes: this.state.notes.trim(),
+        paymentMethod: this.state.paymentMethod,
         items: lines.map((line) => ({ productId: line.productId, quantity: line.quantity }))
       });
       this.state.cart = [];
@@ -2825,6 +2846,10 @@ var app = {
       if (event.target.id === "cart-recreo") {
         this.state.recreoId = Number(event.target.value) || null;
         this.persistRecreo();
+        this.renderCart();
+      }
+      if (event.target.id === "cart-payment-method") {
+        this.state.paymentMethod = event.target.value;
         this.renderCart();
       }
     });
