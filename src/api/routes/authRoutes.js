@@ -1,5 +1,5 @@
 import { readJsonBody, sendJson, serializeCookie } from '../../lib/http.js';
-import { optionalSession } from '../guards.js';
+import { optionalSession, requireUser } from '../guards.js';
 
 export function registerAuthRoutes(routes, ctx) {
   const { auth, config } = ctx;
@@ -68,6 +68,20 @@ export function registerAuthRoutes(routes, ctx) {
     handler: async (req, res) => {
       const { user } = optionalSession(ctx, req);
       sendJson(res, 200, { user });
+    },
+  });
+
+  routes.push({
+    method: 'PUT',
+    path: '/api/auth/password',
+    handler: async (req, res) => {
+      const session = requireUser(ctx, req);
+      const body = await readJsonBody(req);
+      auth.changePassword(session.user.id, {
+        currentPassword: body.currentPassword,
+        newPassword: body.newPassword,
+      });
+      sendJson(res, 200, { ok: true });
     },
   });
 }

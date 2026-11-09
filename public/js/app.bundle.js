@@ -166,6 +166,22 @@ var localBackend = {
     setLocalSession(null);
     return { ok: true };
   },
+  changePassword(currentPassword, newPassword) {
+    const session = getLocalSession();
+    if (!session)
+      throw new ApiError("No autenticado", { status: 401 });
+    const db = loadLocalDb();
+    const user = db.users.find((u) => u.id === session.id);
+    if (!user || user.password !== currentPassword) {
+      throw new ApiError("La contraseña actual es incorrecta.", { status: 401, code: "INVALID_CREDENTIALS" });
+    }
+    if (!newPassword || newPassword.length < 8) {
+      throw new ApiError("La nueva contraseña debe tener al menos 8 caracteres.", { status: 400 });
+    }
+    user.password = newPassword;
+    saveLocalDb(db);
+    return { ok: true };
+  },
   getProducts({ search, categoryId, available } = {}) {
     const db = loadLocalDb();
     const catMap = new Map(db.categories.map((c) => [c.id, c]));
@@ -591,6 +607,8 @@ function handleLocalFallback(path, method, body) {
     return localBackend.register(body);
   if (routePath === "/auth/logout")
     return localBackend.logout();
+  if (routePath === "/auth/password" && method === "PUT")
+    return localBackend.changePassword(body.currentPassword, body.newPassword);
   if (routePath === "/products")
     return localBackend.getProducts(params);
   if (routePath === "/categories")
@@ -675,6 +693,7 @@ var api = {
   login: (email, password) => request("/auth/login", { method: "POST", body: { email, password } }),
   register: (payload) => request("/auth/register", { method: "POST", body: payload }),
   logout: () => request("/auth/logout", { method: "POST" }),
+  changePassword: (payload) => request("/auth/password", { method: "PUT", body: payload }),
   getProducts: (params = {}) => request(`/products${toQuery(params)}`),
   getCategories: () => request("/categories"),
   getRecreos: () => request("/recreos"),
@@ -2371,6 +2390,67 @@ var app = {
     await Promise.allSettled([this.loadCatalog(), this.loadOrders()]);
     this.render();
   },
+  async openChangePasswordModal() {
+    const modal = openModal({
+      title: "Cambiar contraseña",
+      subtitle: "Ingresá tu contraseña actual y la nueva.",
+      content: `
+        <form id="password-form" class="form" novalidate>
+          <div class="field">
+            <label for="cp-current">Contraseña actual</label>
+            <input id="cp-current" name="currentPassword" type="password" required maxlength="128" />
+          </div>
+          <div class="field">
+            <label for="cp-new">Nueva contraseña</label>
+            <input id="cp-new" name="newPassword" type="password" required minlength="8" maxlength="128" />
+          </div>
+          <div class="field">
+            <label for="cp-confirm">Repetir nueva contraseña</label>
+            <input id="cp-confirm" name="confirmPassword" type="password" required minlength="8" maxlength="128" />
+          </div>
+          <p class="form-error" data-form-error hidden></p>
+        </form>
+      `,
+      footer: `
+        <button type="button" class="btn btn-ghost" data-close>Cancelar</button>
+        <button type="submit" form="password-form" class="btn btn-primary">Cambiar contraseña</button>
+      `
+    });
+    const form = modal.root.querySelector("#password-form");
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const box = form.querySelector("[data-form-error]");
+      box.hidden = true;
+      box.textContent = "";
+      const currentPassword = form.currentPassword.value;
+      const newPassword = form.newPassword.value;
+      const confirmPassword = form.confirmPassword.value;
+      if (newPassword !== confirmPassword) {
+        box.textContent = "Las contraseñas nuevas no coinciden.";
+        box.hidden = false;
+        return;
+      }
+      if (newPassword.length < 8) {
+        box.textContent = "La nueva contraseña debe tener al menos 8 caracteres.";
+        box.hidden = false;
+        return;
+      }
+      const submitButton = modal.root.querySelector('[type="submit"]');
+      submitButton.disabled = true;
+      submitButton.textContent = "Guardando...";
+      try {
+        await api.changePassword({ currentPassword, newPassword });
+        modal.close();
+        toast("Contraseña actualizada correctamente.");
+      } catch (error) {
+        box.textContent = error.message || "No se pudo cambiar la contraseña.";
+        box.hidden = false;
+      } finally {
+        submitButton.disabled = false;
+        submitButton.textContent = "Cambiar contraseña";
+      }
+    });
+  },
   async logout() {
     try {
       await api.logout();
@@ -2488,6 +2568,7 @@ var app = {
               <small>${user.role === "admin" ? "Administración" : "Alumno"}</small>
             </span>
           </div>
+          <button type="button" class="icon-btn" data-action="change-password" title="Cambiar contraseña" aria-label="Cambiar contraseña">\uD83D\uDD11</button>
           <button type="button" class="icon-btn logout-btn" data-action="logout" title="Cerrar sesión" aria-label="Cerrar sesión">⏻</button>
         </div>
       </div>
@@ -2808,6 +2889,9 @@ var app = {
         return;
       case "open-orders":
         this.navigate("pedidos");
+        return;
+      case "change-password":
+        await this.openChangePasswordModal();
         return;
       case "pay-order": {
         const id = Number(target.dataset.id);

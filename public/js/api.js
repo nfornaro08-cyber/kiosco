@@ -185,6 +185,22 @@ const localBackend = {
     return { ok: true };
   },
 
+  changePassword(currentPassword, newPassword) {
+    const session = getLocalSession();
+    if (!session) throw new ApiError('No autenticado', { status: 401 });
+    const db = loadLocalDb();
+    const user = db.users.find((u) => u.id === session.id);
+    if (!user || user.password !== currentPassword) {
+      throw new ApiError('La contraseña actual es incorrecta.', { status: 401, code: 'INVALID_CREDENTIALS' });
+    }
+    if (!newPassword || newPassword.length < 8) {
+      throw new ApiError('La nueva contraseña debe tener al menos 8 caracteres.', { status: 400 });
+    }
+    user.password = newPassword;
+    saveLocalDb(db);
+    return { ok: true };
+  },
+
   getProducts({ search, categoryId, available } = {}) {
     const db = loadLocalDb();
     const catMap = new Map(db.categories.map((c) => [c.id, c]));
@@ -633,6 +649,7 @@ function handleLocalFallback(path, method, body) {
   if (routePath === '/auth/login') return localBackend.login(body.email, body.password);
   if (routePath === '/auth/register') return localBackend.register(body);
   if (routePath === '/auth/logout') return localBackend.logout();
+  if (routePath === '/auth/password' && method === 'PUT') return localBackend.changePassword(body.currentPassword, body.newPassword);
 
   if (routePath === '/products') return localBackend.getProducts(params);
   if (routePath === '/categories') return localBackend.getCategories();
@@ -713,6 +730,7 @@ export const api = {
   login: (email, password) => request('/auth/login', { method: 'POST', body: { email, password } }),
   register: (payload) => request('/auth/register', { method: 'POST', body: payload }),
   logout: () => request('/auth/logout', { method: 'POST' }),
+  changePassword: (payload) => request('/auth/password', { method: 'PUT', body: payload }),
 
   getProducts: (params = {}) => request(`/products${toQuery(params)}`),
   getCategories: () => request('/categories'),

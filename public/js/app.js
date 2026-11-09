@@ -163,6 +163,72 @@ const app = {
     this.render();
   },
 
+  async openChangePasswordModal() {
+    const modal = openModal({
+      title: 'Cambiar contraseña',
+      subtitle: 'Ingresá tu contraseña actual y la nueva.',
+      content: `
+        <form id="password-form" class="form" novalidate>
+          <div class="field">
+            <label for="cp-current">Contraseña actual</label>
+            <input id="cp-current" name="currentPassword" type="password" required maxlength="128" />
+          </div>
+          <div class="field">
+            <label for="cp-new">Nueva contraseña</label>
+            <input id="cp-new" name="newPassword" type="password" required minlength="8" maxlength="128" />
+          </div>
+          <div class="field">
+            <label for="cp-confirm">Repetir nueva contraseña</label>
+            <input id="cp-confirm" name="confirmPassword" type="password" required minlength="8" maxlength="128" />
+          </div>
+          <p class="form-error" data-form-error hidden></p>
+        </form>
+      `,
+      footer: `
+        <button type="button" class="btn btn-ghost" data-close>Cancelar</button>
+        <button type="submit" form="password-form" class="btn btn-primary">Cambiar contraseña</button>
+      `,
+    });
+
+    const form = modal.root.querySelector('#password-form');
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const box = form.querySelector('[data-form-error]');
+      box.hidden = true;
+      box.textContent = '';
+
+      const currentPassword = form.currentPassword.value;
+      const newPassword = form.newPassword.value;
+      const confirmPassword = form.confirmPassword.value;
+
+      if (newPassword !== confirmPassword) {
+        box.textContent = 'Las contraseñas nuevas no coinciden.';
+        box.hidden = false;
+        return;
+      }
+      if (newPassword.length < 8) {
+        box.textContent = 'La nueva contraseña debe tener al menos 8 caracteres.';
+        box.hidden = false;
+        return;
+      }
+
+      const submitButton = modal.root.querySelector('[type="submit"]');
+      submitButton.disabled = true;
+      submitButton.textContent = 'Guardando...';
+      try {
+        await api.changePassword({ currentPassword, newPassword });
+        modal.close();
+        toast('Contraseña actualizada correctamente.');
+      } catch (error) {
+        box.textContent = error.message || 'No se pudo cambiar la contraseña.';
+        box.hidden = false;
+      } finally {
+        submitButton.disabled = false;
+        submitButton.textContent = 'Cambiar contraseña';
+      }
+    });
+  },
+
   async logout() {
     try {
       await api.logout();
@@ -311,6 +377,7 @@ const app = {
               <small>${user.role === 'admin' ? 'Administración' : 'Alumno'}</small>
             </span>
           </div>
+          <button type="button" class="icon-btn" data-action="change-password" title="Cambiar contraseña" aria-label="Cambiar contraseña">🔑</button>
           <button type="button" class="icon-btn logout-btn" data-action="logout" title="Cerrar sesión" aria-label="Cerrar sesión">⏻</button>
         </div>
       </div>
@@ -696,6 +763,10 @@ const app = {
 
       case 'open-orders':
         this.navigate('pedidos');
+        return;
+
+      case 'change-password':
+        await this.openChangePasswordModal();
         return;
 
       case 'pay-order': {

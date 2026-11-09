@@ -117,9 +117,31 @@ export function createAuthService({ db, config }) {
     sessions.deleteExpired();
   }
 
+  function changePassword(userId, { currentPassword, newPassword }) {
+    const id = Number(userId);
+    const user = users.findById(id);
+    if (!user) throw AppError.notFound('USER_NOT_FOUND', 'El usuario no existe.');
+    if (!user.active) throw AppError.forbidden('USER_INACTIVE', 'La cuenta está desactivada.');
+
+    if (typeof currentPassword !== 'string' || currentPassword.length === 0) {
+      throw AppError.badRequest('INVALID_PASSWORD', 'Ingresá tu contraseña actual.');
+    }
+    if (!verifyPassword(currentPassword, user.passwordHash)) {
+      throw AppError.unauthorized('INVALID_CREDENTIALS', 'La contraseña actual es incorrecta.');
+    }
+
+    const cleanNew = parsePassword(newPassword);
+    if (cleanNew === currentPassword) {
+      throw AppError.badRequest('SAME_PASSWORD', 'La nueva contraseña debe ser diferente a la actual.');
+    }
+
+    users.updatePassword(id, hashPassword(cleanNew));
+    return { ok: true };
+  }
+
   function listUsers() {
     return users.list().map(publicUser);
   }
 
-  return { register, login, resolveSession, logout, cleanup, listUsers, publicUser };
+  return { register, login, resolveSession, logout, cleanup, listUsers, publicUser, changePassword };
 }

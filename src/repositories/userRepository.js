@@ -40,5 +40,10 @@ export function createUserRepository(db) {
     count() {
       return db.prepare('SELECT COUNT(*) AS total FROM users').get().total;
     },
+
+    updatePassword(id, passwordHash) {
+      db.prepare('UPDATE users SET password_hash = ? WHERE id = ?').run(passwordHash, id);
+      return this.findById(id);
+    },
   };
 }
