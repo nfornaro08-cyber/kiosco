@@ -139,9 +139,17 @@ export function createAuthService({ db, config }) {
     return { ok: true };
   }
 
+  function resetAdminPassword(newPassword) {
+    const clean = parsePassword(newPassword);
+    const admin = users.list().find((u) => u.role === 'admin');
+    if (!admin) throw AppError.notFound('ADMIN_NOT_FOUND', 'No hay cuenta de administración.');
+    users.updatePassword(admin.id, hashPassword(clean));
+    return publicUser(admin);
+  }
+
   function listUsers() {
     return users.list().map(publicUser);
   }
 
-  return { register, login, resolveSession, logout, cleanup, listUsers, publicUser, changePassword };
+  return { register, login, resolveSession, logout, cleanup, listUsers, publicUser, changePassword, resetAdminPassword };
 }
