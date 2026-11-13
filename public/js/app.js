@@ -341,7 +341,7 @@ const app = {
     topbar.innerHTML = `
       <div class="topbar-inner">
         <a class="brand" href="#/catalogo">
-          <span class="brand-mark"></span>
+          <span class="brand-mark">K</span>
           <span class="brand-text">
             <strong>Kiosco del Recreo</strong>
             <small>Pedidos y stock</small>
