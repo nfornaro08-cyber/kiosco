@@ -15,6 +15,12 @@ export const config = {
   sessionDays: Number(process.env.SESSION_DAYS || 7),
   cookieName: 'kiosco_session',
   isProduction,
+  auth: {
+    google: {
+      clientId: process.env.GOOGLE_CLIENT_ID || '',
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET || '',
+    },
+  },
   payments: {
     provider: process.env.PAYMENT_PROVIDER || 'mercadopago',
     accessToken: process.env.PAYMENT_ACCESS_TOKEN || '',

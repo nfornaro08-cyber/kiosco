@@ -72,6 +72,50 @@ export function registerAuthRoutes(routes, ctx) {
   });
 
   routes.push({
+    method: 'GET',
+    path: '/api/auth/google',
+    handler: async (req, res) => {
+      if (!auth.googleConfigured()) {
+        sendJson(res, 503, { error: { code: 'GOOGLE_NOT_CONFIGURED', message: 'Google login no está configurado.' } });
+        return;
+      }
+      const proto = req.headers['x-forwarded-proto'] || 'http';
+      const host = req.headers.host || 'localhost:3000';
+      const redirectUri = `${proto}://${host}/api/auth/google/callback`;
+      const state = Math.random().toString(36).slice(2);
+      const url = auth.getGoogleAuthorizeUrl(redirectUri, state);
+      res.writeHead(302, { Location: url });
+      res.end();
+    },
+  });
+
+  routes.push({
+    method: 'GET',
+    path: '/api/auth/google/callback',
+    handler: async (req, res, { url }) => {
+      const code = url.searchParams.get('code');
+      const error = url.searchParams.get('error');
+      if (error || !code) {
+        res.writeHead(302, { Location: '/#/auth?error=google' });
+        res.end();
+        return;
+      }
+      const proto = req.headers['x-forwarded-proto'] || 'http';
+      const host = req.headers.host || 'localhost:3000';
+      const redirectUri = `${proto}://${host}/api/auth/google/callback`;
+      try {
+        const result = await auth.handleGoogleCallback(code, redirectUri);
+        sessionCookie(res, result.token, result.expiresAt);
+        res.writeHead(302, { Location: '/' });
+        res.end();
+      } catch (err) {
+        res.writeHead(302, { Location: '/#/auth?error=google' });
+        res.end();
+      }
+    },
+  });
+
+  routes.push({
     method: 'PUT',
     path: '/api/auth/password',
     handler: async (req, res) => {

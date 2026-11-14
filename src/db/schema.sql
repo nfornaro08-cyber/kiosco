@@ -6,7 +6,8 @@ CREATE TABLE IF NOT EXISTS users (
   id            INTEGER PRIMARY KEY AUTOINCREMENT,
   name          TEXT    NOT NULL,
   email         TEXT    NOT NULL UNIQUE COLLATE NOCASE,
-  password_hash TEXT    NOT NULL,
+  password_hash TEXT    NOT NULL DEFAULT '',
+  google_sub    TEXT    UNIQUE,
   role          TEXT    NOT NULL DEFAULT 'cliente' CHECK (role IN ('cliente', 'admin')),
   active        INTEGER NOT NULL DEFAULT 1 CHECK (active IN (0, 1)),
   created_at    TEXT    NOT NULL

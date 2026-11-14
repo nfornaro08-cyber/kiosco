@@ -44,6 +44,15 @@ export function renderAuth(app, container) {
             <button type="button" class="auth-tab" data-mode="register" role="tab">Crear cuenta</button>
           </div>
 
+          <div class="auth-google">
+            <a class="btn btn-google btn-block" href="/api/auth/google">
+              <span class="btn-google-icon">G</span> Continuar con Google
+            </a>
+            <p class="auth-google-note">Usá tu cuenta de Google para ingresar o registrarte.</p>
+          </div>
+
+          <div class="auth-divider">o</div>
+
           <form id="auth-form" class="form" novalidate>
             <div class="field" data-field="name" hidden>
               <label for="auth-name">Nombre y apellido</label>

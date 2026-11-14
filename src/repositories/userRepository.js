@@ -6,6 +6,7 @@ export function createUserRepository(db) {
       name: row.name,
       email: row.email,
       passwordHash: row.password_hash,
+      googleSub: row.google_sub ?? null,
       role: row.role,
       active: Boolean(row.active),
       createdAt: row.created_at,
@@ -14,11 +15,11 @@ export function createUserRepository(db) {
 
   return {
     map,
-    create({ name, email, passwordHash, role = 'cliente' }) {
+    create({ name, email, passwordHash = '', role = 'cliente', googleSub = null }) {
       const now = new Date().toISOString();
       const result = db
-        .prepare('INSERT INTO users (name, email, password_hash, role, active, created_at) VALUES (?, ?, ?, ?, 1, ?)')
-        .run(name, email, passwordHash, role, now);
+        .prepare('INSERT INTO users (name, email, password_hash, role, active, google_sub, created_at) VALUES (?, ?, ?, ?, 1, ?, ?)')
+        .run(name, email, passwordHash, role, googleSub, now);
       return this.findById(Number(result.lastInsertRowid));
     },
 
@@ -28,6 +29,15 @@ export function createUserRepository(db) {
 
     findByEmail(email) {
       return map(db.prepare('SELECT * FROM users WHERE email = ? COLLATE NOCASE').get(email));
+    },
+
+    findByGoogleSub(sub) {
+      return map(db.prepare('SELECT * FROM users WHERE google_sub = ?').get(sub));
+    },
+
+    updateGoogleSub(id, sub) {
+      db.prepare('UPDATE users SET google_sub = ? WHERE id = ?').run(sub, id);
+      return this.findById(id);
     },
 
     list() {

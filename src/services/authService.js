@@ -1,6 +1,7 @@
 import { randomBytes } from 'node:crypto';
 import { AppError } from '../lib/errors.js';
 import { hashPassword, verifyPassword } from '../lib/password.js';
+import { buildAuthorizeUrl, exchangeCode, verifyIdToken } from '../lib/google.js';
 import { hashToken } from '../lib/tokens.js';
 import { addDays } from '../lib/dates.js';
 import { email as parseEmail, password as parsePassword, text } from '../lib/validation.js';
@@ -147,9 +148,45 @@ export function createAuthService({ db, config }) {
     return publicUser(admin);
   }
 
+  function googleLogin(profile) {
+    let user = users.findByGoogleSub(profile.sub);
+    if (!user) {
+      user = users.findByEmail(profile.email);
+      if (user) {
+        users.updateGoogleSub(user.id, profile.sub);
+        user = users.findById(user.id);
+      } else {
+        user = users.create({
+          name: profile.name,
+          email: profile.email,
+          passwordHash: '',
+          role: 'cliente',
+          googleSub: profile.sub,
+        });
+      }
+    }
+
+    if (!user.active) {
+      throw AppError.forbidden('USER_INACTIVE', 'La cuenta está desactivada.');
+    }
+
+    const session = createSession(user.id);
+    return { user: publicUser(user), ...session };
+  }
+
+  function getGoogleAuthorizeUrl(redirectUri, state) {
+    return buildAuthorizeUrl({ config, redirectUri, state });
+  }
+
+  async function handleGoogleCallback(code, redirectUri) {
+    const tokenData = await exchangeCode({ code, redirectUri, config });
+    const profile = await verifyIdToken({ idToken: tokenData.id_token, config });
+    return googleLogin(profile);
+  }
+
   function listUsers() {
     return users.list().map(publicUser);
   }
 
-  return { register, login, resolveSession, logout, cleanup, listUsers, publicUser, changePassword, resetAdminPassword };
+  return { register, login, resolveSession, logout, cleanup, listUsers, publicUser, changePassword, resetAdminPassword, googleConfigured: () => (config.auth?.google?.clientId && config.auth?.google?.clientSecret) ? true : false, getGoogleAuthorizeUrl, handleGoogleCallback };
 }

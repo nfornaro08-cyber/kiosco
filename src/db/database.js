@@ -25,6 +25,12 @@ export function applySchema(db) {
   db.exec(schema);
 
   // Migracion liviana para bases ya existentes.
+  // Migracion de usuarios: google_sub.
+  const userColumns = db.prepare('PRAGMA table_info(users)').all().map((row) => row.name);
+  if (!userColumns.includes('google_sub')) {
+    db.exec('ALTER TABLE users ADD COLUMN google_sub TEXT;');
+  }
+
   const columns = db.prepare('PRAGMA table_info(orders)').all().map((row) => row.name);
   if (!columns.includes('payment_status')) {
     db.exec("ALTER TABLE orders ADD COLUMN payment_status TEXT NOT NULL DEFAULT 'unpaid';");
