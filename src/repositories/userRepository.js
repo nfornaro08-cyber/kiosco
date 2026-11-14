@@ -6,20 +6,22 @@ export function createUserRepository(db) {
       name: row.name,
       email: row.email,
       passwordHash: row.password_hash,
-      googleSub: row.google_sub ?? null,
       role: row.role,
       active: Boolean(row.active),
+      authProvider: row.auth_provider ?? 'local',
+      googleSub: row.google_sub ?? null,
       createdAt: row.created_at,
     };
   }
 
   return {
-    map,
-    create({ name, email, passwordHash = '', role = 'cliente', googleSub = null }) {
+    create({ name, email, passwordHash, role = 'cliente', authProvider = 'local', googleSub = null }) {
       const now = new Date().toISOString();
       const result = db
-        .prepare('INSERT INTO users (name, email, password_hash, role, active, google_sub, created_at) VALUES (?, ?, ?, ?, 1, ?, ?)')
-        .run(name, email, passwordHash, role, googleSub, now);
+        .prepare(
+          "INSERT INTO users (name, email, password_hash, role, active, auth_provider, google_sub, created_at) VALUES (?, ?, ?, ?, 1, ?, ?, ?)",
+        )
+        .run(name, email, passwordHash, role, authProvider, googleSub, now);
       return this.findById(Number(result.lastInsertRowid));
     },
 
@@ -35,8 +37,8 @@ export function createUserRepository(db) {
       return map(db.prepare('SELECT * FROM users WHERE google_sub = ?').get(sub));
     },
 
-    updateGoogleSub(id, sub) {
-      db.prepare('UPDATE users SET google_sub = ? WHERE id = ?').run(sub, id);
+    linkGoogleAccount(id, sub) {
+      db.prepare("UPDATE users SET google_sub = ?, auth_provider = 'google' WHERE id = ?").run(sub, id);
       return this.findById(id);
     },
 

@@ -32,7 +32,7 @@ function renderOrderCard(order) {
     <article class="order-card" data-order-card="${order.id}">
       <header class="order-head">
         <div>
-          <p class="order-code">${escapeHtml(order.code)}</p>
+          <p class="order-code">#${order.id}</p>
           <p class="order-when">
             ${escapeHtml(order.recreoName ?? 'Recreo')} · ${escapeHtml(order.recreoStartTime ?? '')}–${escapeHtml(order.recreoEndTime ?? '')}
             · ${escapeHtml(formatLongDate(order.serviceDate))}

@@ -9,11 +9,11 @@ function productCard(app, product) {
   return `
     <article class="product-card" data-card="${product.id}">
       <div class="product-media">
-        <span class="product-emoji" aria-hidden="true">${escapeHtml(product.emoji || '')}</span>
+        ${product.emoji ? `<span class="product-emoji" aria-hidden="true">${escapeHtml(product.emoji)}</span>` : ''}
         <span class="stock-pill stock-${stock.tone}"><span class="stock-dot"></span>${escapeHtml(stock.label)}</span>
       </div>
       <div class="product-body">
-        <p class="product-category">${escapeHtml(product.categoryEmoji ?? '')} ${escapeHtml(product.categoryName ?? 'Sin categoría')}</p>
+        <p class="product-category">${product.categoryEmoji ? `${escapeHtml(product.categoryEmoji)} ` : ''}${escapeHtml(product.categoryName ?? 'Sin categoría')}</p>
         <h3 class="product-name">${escapeHtml(product.name)}</h3>
         <p class="product-desc">${escapeHtml(product.description || '')}</p>
       </div>
@@ -113,7 +113,7 @@ export function renderCatalog(app, container) {
       ...categories.map(
         (category) => `
           <button type="button" class="chip ${filters.categoryId === category.id ? 'is-active' : ''}" data-category="${category.id}">
-            <span aria-hidden="true">${escapeHtml(category.emoji)}</span> ${escapeHtml(category.name)}
+            ${category.emoji ? `<span aria-hidden="true">${escapeHtml(category.emoji)}</span> ` : ''}${escapeHtml(category.name)}
           </button>`,
       ),
     ].join('');

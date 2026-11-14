@@ -20,7 +20,6 @@ export function createApp({ dbPath = config.dbPath } = {}) {
   const seedResult = seedDatabase(db);
 
   const ctx = {
-    db,
     config,
     auth: createAuthService({ db, config }),
     catalog: createCatalogService({ db }),
@@ -30,15 +29,6 @@ export function createApp({ dbPath = config.dbPath } = {}) {
     orders: createOrderService({ db, config }),
     payments: createPaymentService({ db, config }),
   };
-
-  if (process.env.RESET_ADMIN_PASSWORD) {
-    try {
-      ctx.auth.resetAdminPassword(process.env.RESET_ADMIN_PASSWORD);
-      console.log('[auth] Contraseña de administración restablecida.');
-    } catch (error) {
-      console.error('[auth] No se pudo restablecer la contraseña de admin:', error.message);
-    }
-  }
 
   const handleApi = createApiRouter(ctx);
   const serveStatic = createStaticHandler(config.publicDir);

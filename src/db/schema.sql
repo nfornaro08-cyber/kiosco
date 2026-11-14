@@ -6,12 +6,14 @@ CREATE TABLE IF NOT EXISTS users (
   id            INTEGER PRIMARY KEY AUTOINCREMENT,
   name          TEXT    NOT NULL,
   email         TEXT    NOT NULL UNIQUE COLLATE NOCASE,
-  password_hash TEXT    NOT NULL DEFAULT '',
-  google_sub    TEXT    UNIQUE,
+  password_hash TEXT    NOT NULL,
   role          TEXT    NOT NULL DEFAULT 'cliente' CHECK (role IN ('cliente', 'admin')),
   active        INTEGER NOT NULL DEFAULT 1 CHECK (active IN (0, 1)),
+  auth_provider TEXT    NOT NULL DEFAULT 'local' CHECK (auth_provider IN ('local', 'google')),
+  google_sub    TEXT,
   created_at    TEXT    NOT NULL
 );
+CREATE UNIQUE INDEX IF NOT EXISTS idx_users_google_sub ON users(google_sub) WHERE google_sub IS NOT NULL;
 
 CREATE TABLE IF NOT EXISTS sessions (
   id         INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -57,7 +59,6 @@ CREATE TABLE IF NOT EXISTS recreos (
 
 CREATE TABLE IF NOT EXISTS orders (
   id             INTEGER PRIMARY KEY AUTOINCREMENT,
-  code           TEXT    NOT NULL UNIQUE,
   user_id        INTEGER NOT NULL REFERENCES users(id),
   recreo_id      INTEGER NOT NULL REFERENCES recreos(id),
   service_date   TEXT    NOT NULL,

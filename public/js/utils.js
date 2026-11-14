@@ -80,14 +80,6 @@ export function initials(name) {
     .join('');
 }
 
-export function debounce(fn, wait = 250) {
-  let timer;
-  return (...args) => {
-    clearTimeout(timer);
-    timer = setTimeout(() => fn(...args), wait);
-  };
-}
-
 /** Fecha de hoy en la zona horaria del kiosco (coincide con la que usa el backend). */
 export function todayISO() {
   const parts = new Intl.DateTimeFormat('en-CA', {
@@ -98,8 +90,4 @@ export function todayISO() {
   }).formatToParts(new Date());
   const get = (type) => parts.find((part) => part.type === type)?.value ?? '';
   return `${get('year')}-${get('month')}-${get('day')}`;
-}
-
-export function pluralize(count, singular, plural) {
-  return count === 1 ? singular : plural;
 }

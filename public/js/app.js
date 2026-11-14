@@ -58,10 +58,27 @@ const app = {
     this.bindGlobalEvents();
     this.render();
 
+    // Mensajes que vuelven del login con Google.
+    const googleParam = new URLSearchParams(location.search).get('google');
+    if (googleParam) {
+      const domain = new URLSearchParams(location.search).get('dominio');
+      const messages = {
+        dominio: domain
+          ? `Solo pueden ingresar cuentas @${domain}. Usá tu cuenta del colegio.`
+          : 'Solo pueden ingresar cuentas del dominio del colegio.',
+        denegado: 'Cancelaste el ingreso con Google.',
+        error: 'No se pudo completar el ingreso con Google. Intentá de nuevo.',
+      };
+      if (messages[googleParam]) toast(messages[googleParam], 'error', 7000);
+      history.replaceState(null, '', location.pathname + location.hash);
+    }
+
     try {
       const { user } = await api.me();
       this.state.user = user;
       if (user) {
+        // Re-parsear con el rol conocido: sin esto, recargar en #/admin/... cae al catalogo.
+        this.state.route = this.parseRoute();
         await Promise.allSettled([this.loadCatalog(), this.loadOrders()]);
       }
     } catch (error) {
@@ -341,7 +358,7 @@ const app = {
     topbar.innerHTML = `
       <div class="topbar-inner">
         <a class="brand" href="#/catalogo">
-          <span class="brand-mark">K</span>
+          <span class="brand-mark"><img src="./favicon.svg" alt="Kiosco del Recreo" /></span>
           <span class="brand-text">
             <strong>Kiosco del Recreo</strong>
             <small>Pedidos y stock</small>
@@ -378,8 +395,8 @@ const app = {
               <small>${user.role === 'admin' ? 'Administración' : 'Alumno'}</small>
             </span>
           </div>
-          <button type="button" class="icon-btn" data-action="change-password" title="Cambiar contraseña" aria-label="Cambiar contraseña"></button>
-          <button type="button" class="icon-btn logout-btn" data-action="logout" title="Cerrar sesión" aria-label="Cerrar sesión"></button>
+          <button type="button" class="icon-btn" data-action="change-password" title="Cambiar contraseña" aria-label="Cambiar contraseña">🔑</button>
+          <button type="button" class="icon-btn logout-btn" data-action="logout" title="Cerrar sesión" aria-label="Cerrar sesión">🚪</button>
         </div>
       </div>
     `;
@@ -504,7 +521,7 @@ const app = {
             const overStock = line.quantity > line.product.stock;
             return `
               <div class="cart-line ${overStock ? 'is-warning' : ''}">
-                <span class="cart-line-emoji" aria-hidden="true">${escapeHtml(line.product.emoji || '')}</span>
+                ${line.product.emoji ? `<span class="cart-line-emoji" aria-hidden="true">${escapeHtml(line.product.emoji)}</span>` : ''}
                 <div class="cart-line-info">
                   <strong>${escapeHtml(line.product.name)}</strong>
                   <small>${money(line.product.priceCents)} c/u${overStock ? ' · stock insuficiente' : ''}</small>
@@ -636,7 +653,7 @@ const app = {
       localStorage.removeItem(NOTES_KEY);
       this.closeCart();
 
-      toast(`Pedido ${order.code} confirmado `, 'success', 6000);
+      toast(`Pedido #${order.id} confirmado`, 'success', 6000);
       this.showOrderSuccess(order);
 
       await Promise.allSettled([this.loadCatalog(), this.loadOrders()]);
@@ -661,8 +678,8 @@ const app = {
       subtitle: 'Ya quedó registrado en el kiosco.',
       content: `
         <div class="success-order">
-          <p class="success-label">Código del pedido</p>
-          <p class="success-code">${escapeHtml(order.code)}</p>
+          <p class="success-label">Pedido</p>
+          <p class="success-code">#${order.id}</p>
           <p class="success-meta">${escapeHtml(order.recreoName ?? '')} · ${escapeHtml(formatLongDate(order.serviceDate))}</p>
           <ul class="order-items success-items">
             ${order.items
@@ -672,7 +689,7 @@ const app = {
               .join('')}
           </ul>
           <p class="success-total"><span>Total</span><strong>${money(order.totalCents)}</strong></p>
-          <p class="success-note">Mostrá este código al retirar tu pedido. Podés seguir su estado en “Mis pedidos”.</p>
+          <p class="success-note">Mostrá este número al retirar tu pedido. Podés seguir su estado en “Mis pedidos”.</p>
         </div>
       `,
       footer: `
@@ -810,19 +827,14 @@ const app = {
 };
 
 window.app = app;
-Promise.resolve(window.__kioscoReady)
-  .catch(function () {})
-  .then(function () {
-    return app.init();
-  })
-  .catch(function (error) {
-    console.error('No se pudo iniciar el kiosco', error);
-    var view = document.getElementById('view');
-    if (!view) return;
-    view.innerHTML =
-      '<div class="error-block">' +
-      '<span class="empty-icon"></span>' +
-      '<h3>No se pudo iniciar el kiosco</h3>' +
-      '<p>Recargá la página. Si abriste index.html con doble clic, debería funcionar igual en el navegador.</p>' +
-      '</div>';
-  });
+app.init().catch(function (error) {
+  console.error('No se pudo iniciar el kiosco', error);
+  var view = document.getElementById('view');
+  if (!view) return;
+  view.innerHTML =
+    '<div class="error-block">' +
+    '<span class="empty-icon"></span>' +
+    '<h3>No se pudo iniciar el kiosco</h3>' +
+    '<p>Revisá que el servidor esté corriendo (start.bat) y recargá la página.</p>' +
+    '</div>';
+});

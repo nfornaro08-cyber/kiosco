@@ -13,11 +13,6 @@ export function sendJson(res, status, payload, extraHeaders = {}) {
   res.end(body);
 }
 
-export function sendEmpty(res, status, extraHeaders = {}) {
-  res.writeHead(status, { 'Cache-Control': 'no-store', ...extraHeaders });
-  res.end();
-}
-
 export function parseCookies(header = '') {
   const cookies = {};
   for (const part of String(header).split(';')) {
@@ -47,19 +42,31 @@ export function serializeCookie(name, value, options = {}) {
 export function readJsonBody(req) {
   return new Promise((resolve, reject) => {
     let size = 0;
+    let drained = 0;
+    let rejected = false;
     const chunks = [];
 
     req.on('data', (chunk) => {
+      // Si ya rechazamos por tamaño, seguimos drenando (descartando) para
+      // poder responder 413 sin cortar el socket de golpe.
+      if (rejected) {
+        drained += chunk.length;
+        if (drained > 10_000_000) req.destroy();
+        return;
+      }
       size += chunk.length;
       if (size > MAX_BODY_BYTES) {
+        rejected = true;
+        chunks.length = 0;
         reject(new AppError(413, 'PAYLOAD_TOO_LARGE', 'El contenido enviado es demasiado grande.'));
-        req.destroy();
+        req.resume();
         return;
       }
       chunks.push(chunk);
     });
 
     req.on('end', () => {
+      if (rejected) return;
       if (size === 0) {
         resolve({});
         return;
@@ -79,14 +86,6 @@ export function readJsonBody(req) {
 
     req.on('error', reject);
   });
-}
-
-export function clientIp(req) {
-  const forwarded = req.headers['x-forwarded-for'];
-  if (typeof forwarded === 'string' && forwarded.length > 0) {
-    return forwarded.split(',')[0].trim();
-  }
-  return req.socket?.remoteAddress || 'desconocida';
 }
 
 export function securityHeaders() {

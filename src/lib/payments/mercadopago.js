@@ -13,7 +13,7 @@ export async function createOrder({ accessToken, order, config }) {
     external_reference: `order-${order.id}`,
     processing_mode: 'manual',
     capture_mode: 'automatic_async',
-    description: `Pedido ${order.code}`,
+    description: `Pedido #${order.id}`,
     payer: {
       email: order.userEmail || undefined,
     },

@@ -1,7 +1,6 @@
 import { randomBytes } from 'node:crypto';
 import { AppError } from '../lib/errors.js';
 import { hashPassword, verifyPassword } from '../lib/password.js';
-import { buildAuthorizeUrl, exchangeCode, verifyIdToken } from '../lib/google.js';
 import { hashToken } from '../lib/tokens.js';
 import { addDays } from '../lib/dates.js';
 import { email as parseEmail, password as parsePassword, text } from '../lib/validation.js';
@@ -18,6 +17,7 @@ function publicUser(user) {
     name: user.name,
     email: user.email,
     role: user.role,
+    authProvider: user.authProvider ?? 'local',
     createdAt: user.createdAt,
   };
 }
@@ -61,21 +61,16 @@ export function createAuthService({ db, config }) {
     return { token, expiresAt };
   }
 
-  function register({ name, email, password }) {
+  /**
+   * Crea una cuenta con contrasena. Solo se usa desde el panel de administracion:
+   * acepta cualquier correo y el rol lo define quien crea la cuenta.
+   * No inicia sesion con la cuenta nueva.
+   */
+  function createAccount({ name, email, password, role = 'cliente' }) {
     const cleanName = text(name, 'name', { min: 2, max: 60 });
     const cleanEmail = parseEmail(email);
     const cleanPassword = parsePassword(password);
-
-    const allowedDomains = config.auth?.google?.allowedDomains ?? [];
-    if (allowedDomains.length > 0) {
-      const domain = cleanEmail.split('@')[1]?.toLowerCase() ?? '';
-      if (!allowedDomains.includes(domain)) {
-        throw AppError.forbidden(
-          'DOMAIN_NOT_ALLOWED',
-          `Solo pueden registrarse cuentas ${allowedDomains.map((d) => `@${d}`).join(', ')}.`,
-        );
-      }
-    }
+    const cleanRole = role === 'admin' ? 'admin' : 'cliente';
 
     if (users.findByEmail(cleanEmail)) {
       throw AppError.conflict('EMAIL_IN_USE', 'Ya existe una cuenta registrada con ese correo.');
@@ -85,11 +80,33 @@ export function createAuthService({ db, config }) {
       name: cleanName,
       email: cleanEmail,
       passwordHash: hashPassword(cleanPassword),
-      role: 'cliente',
+      role: cleanRole,
     });
 
-    const session = createSession(user.id);
-    return { user: publicUser(user), ...session };
+    return publicUser(user);
+  }
+
+  /**
+   * Borra una cuenta y todo lo que le pertenece (pedidos, items, sesiones).
+   * No permite borrar la propia cuenta del admin logueado.
+   */
+  function deleteAccount(id, { actorId } = {}) {
+    const target = users.findById(Number(id));
+    if (!target) {
+      throw AppError.notFound('USER_NOT_FOUND', 'El usuario no existe.');
+    }
+    if (Number(id) === Number(actorId)) {
+      throw AppError.badRequest('DELETE_SELF', 'No podés borrar tu propia cuenta mientras estás logueado.');
+    }
+
+    const items = db
+      .prepare('DELETE FROM order_items WHERE order_id IN (SELECT id FROM orders WHERE user_id = ?)')
+      .run(target.id);
+    const orders = db.prepare('DELETE FROM orders WHERE user_id = ?').run(target.id);
+    db.prepare('DELETE FROM sessions WHERE user_id = ?').run(target.id);
+    db.prepare('DELETE FROM users WHERE id = ?').run(target.id);
+
+    return { deleted: true, email: target.email, ordersDeleted: orders.changes, itemsDeleted: items.changes };
   }
 
   function login({ email, password }, ip = 'desconocida') {
@@ -110,6 +127,48 @@ export function createAuthService({ db, config }) {
     }
 
     attempts.delete(key);
+    const session = createSession(user.id);
+    return { user: publicUser(user), ...session };
+  }
+
+  /**
+   * Login federado con Google. El perfil ya viene validado (id_token verificado).
+   * Solo acepta correos de los dominios permitidos y vincula o crea la cuenta.
+   */
+  function loginWithGoogle(profile) {
+    const { email, name, sub } = profile;
+
+    const domains = config.auth.google.allowedDomains;
+    const domain = String(email).split('@')[1]?.toLowerCase() ?? '';
+    if (domains.length > 0 && !domains.includes(domain)) {
+      const allowed = domains.map((d) => `@${d}`).join(', ');
+      throw AppError.forbidden(
+        'GOOGLE_DOMAIN_NOT_ALLOWED',
+        `Solo pueden ingresar cuentas ${allowed}. Tu cuenta es @${domain}.`,
+      );
+    }
+
+    let user = users.findByGoogleSub(sub) ?? users.findByEmail(email);
+
+    if (user && !user.active) {
+      throw AppError.forbidden('USER_INACTIVE', 'La cuenta está desactivada.');
+    }
+
+    if (!user) {
+      // Password inutilizable: la cuenta solo se ingresa via Google.
+      const unusable = hashPassword(randomBytes(24).toString('hex'));
+      user = users.create({
+        name: text(name, 'name', { required: false, max: 60 }) ?? email.split('@')[0],
+        email,
+        passwordHash: unusable,
+        role: 'cliente',
+        authProvider: 'google',
+        googleSub: sub,
+      });
+    } else if (!user.googleSub || user.googleSub !== sub) {
+      user = users.linkGoogleAccount(user.id, sub);
+    }
+
     const session = createSession(user.id);
     return { user: publicUser(user), ...session };
   }
@@ -135,6 +194,9 @@ export function createAuthService({ db, config }) {
     if (!user) throw AppError.notFound('USER_NOT_FOUND', 'El usuario no existe.');
     if (!user.active) throw AppError.forbidden('USER_INACTIVE', 'La cuenta está desactivada.');
 
+    if (user.authProvider === 'google' && !currentPassword) {
+      throw AppError.badRequest('GOOGLE_ACCOUNT', 'Tu cuenta ingresa con Google. Usá ese botón para entrar.');
+    }
     if (typeof currentPassword !== 'string' || currentPassword.length === 0) {
       throw AppError.badRequest('INVALID_PASSWORD', 'Ingresá tu contraseña actual.');
     }
@@ -151,68 +213,9 @@ export function createAuthService({ db, config }) {
     return { ok: true };
   }
 
-  function resetAdminPassword(newPassword) {
-    const clean = parsePassword(newPassword);
-    const admin = users.list().find((u) => u.role === 'admin');
-    if (!admin) throw AppError.notFound('ADMIN_NOT_FOUND', 'No hay cuenta de administración.');
-    users.updatePassword(admin.id, hashPassword(clean));
-    return publicUser(admin);
-  }
-
-  function googleLogin(profile) {
-    let user = users.findByGoogleSub(profile.sub);
-    if (!user) {
-      user = users.findByEmail(profile.email);
-      if (user) {
-        users.updateGoogleSub(user.id, profile.sub);
-        user = users.findById(user.id);
-      } else {
-        user = users.create({
-          name: profile.name,
-          email: profile.email,
-          passwordHash: '',
-          role: 'cliente',
-          googleSub: profile.sub,
-        });
-      }
-    }
-
-    if (!user.active) {
-      throw AppError.forbidden('USER_INACTIVE', 'La cuenta está desactivada.');
-    }
-
-    const session = createSession(user.id);
-    return { user: publicUser(user), ...session };
-  }
-
-  function getGoogleAuthorizeUrl(redirectUri, state) {
-    return buildAuthorizeUrl({ config, redirectUri, state });
-  }
-
-  async function handleGoogleCallback(code, redirectUri) {
-    const tokenData = await exchangeCode({ code, redirectUri, config });
-    const profile = await verifyIdToken({ idToken: tokenData.id_token, config });
-    return googleLogin(profile);
-  }
-
-  function deleteAccount(id, { actorId } = {}) {
-    const target = users.findById(Number(id));
-    if (!target) throw AppError.notFound('USER_NOT_FOUND', 'El usuario no existe.');
-    if (Number(id) === Number(actorId)) {
-      throw AppError.badRequest('DELETE_SELF', 'No podés borrar tu propia cuenta mientras estás logueado.');
-    }
-
-    db.prepare('DELETE FROM order_items WHERE order_id IN (SELECT id FROM orders WHERE user_id = ?)').run(target.id);
-    db.prepare('DELETE FROM orders WHERE user_id = ?').run(target.id);
-    db.prepare('DELETE FROM sessions WHERE user_id = ?').run(target.id);
-    db.prepare('DELETE FROM users WHERE id = ?').run(target.id);
-
-    return { deleted: true, email: target.email };
-  }
-
   function listUsers() {
     return users.list().map(publicUser);
   }
 
-  return { register, login, resolveSession, logout, cleanup, listUsers, publicUser, changePassword, resetAdminPassword, deleteAccount, googleConfigured: () => (config.auth?.google?.clientId && config.auth?.google?.clientSecret) ? true : false, getGoogleAuthorizeUrl, handleGoogleCallback };
+  return { login, loginWithGoogle, createAccount, deleteAccount, resolveSession, logout, cleanup, listUsers, changePassword };
 }

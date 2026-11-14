@@ -15,16 +15,11 @@ export const config = {
   sessionDays: Number(process.env.SESSION_DAYS || 7),
   cookieName: 'kiosco_session',
   isProduction,
-  auth: {
-    google: {
-      clientId: process.env.GOOGLE_CLIENT_ID || '',
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET || '',
-    },
-  },
   payments: {
     provider: process.env.PAYMENT_PROVIDER || 'mercadopago',
     accessToken: process.env.PAYMENT_ACCESS_TOKEN || '',
-    publicKey: process.env.PAYMENT_PUBLIC_KEY || '',
+    // Firma que Mercado Pago manda en el header x-signature de sus webhooks.
+    // Si se configura, el webhook rechaza notificaciones sin firma valida.
     webhookSecret: process.env.PAYMENT_WEBHOOK_SECRET || '',
     baseUrl: process.env.PAYMENT_BASE_URL || 'http://127.0.0.1:3000',
   },
@@ -37,5 +32,17 @@ export const config = {
     name: 'Alumno Demo',
     email: 'alumno@kiosco.local',
     password: 'Alumno1234',
+  },
+  auth: {
+    google: {
+      clientId: process.env.GOOGLE_CLIENT_ID || '',
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET || '',
+      // Dominios de correo permitidos, separados por coma.
+      // Ej: GOOGLE_ALLOWED_DOMAINS=sanjoserosario.com.ar
+      allowedDomains: String(process.env.GOOGLE_ALLOWED_DOMAINS || '')
+        .split(',')
+        .map((domain) => domain.trim().toLowerCase())
+        .filter(Boolean),
+    },
   },
 };

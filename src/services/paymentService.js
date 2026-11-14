@@ -25,6 +25,10 @@ export function createPaymentService({ db, config }) {
       throw AppError.conflict('ORDER_FINAL', 'No se puede pagar un pedido cancelado o entregado.');
     }
 
+    if (!config.payments.accessToken) {
+      throw AppError.internal('Los pagos no están configurados en el servidor.');
+    }
+
     const existing = payments.findByOrder(order.id);
     if (existing && existing.status === 'approved') {
       throw AppError.conflict('PAYMENT_ALREADY_APPROVED', 'Este pedido ya fue pagado.');
@@ -39,10 +43,6 @@ export function createPaymentService({ db, config }) {
           externalReference: `order-${order.id}`,
         });
 
-    if (!config.payments.accessToken) {
-      throw AppError.internal('Los pagos no están configurados en el servidor.');
-    }
-
     let result;
     try {
       result = await createOrder({
@@ -51,6 +51,7 @@ export function createPaymentService({ db, config }) {
         config,
       });
     } catch (error) {
+      console.error('[mercadopago] createOrder:', error?.message ?? error);
       throw AppError.internal('No se pudo crear la orden de pago. Intentá nuevamente.');
     }
 

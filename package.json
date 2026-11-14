@@ -8,8 +8,7 @@
     "start": "bun run src/server.js",
     "dev": "bun --watch run src/server.js",
     "seed": "bun run src/db/seed.js",
-    "reset": "bun run src/db/seed.js --force",
-    "test": "bun test"
+    "reset": "bun run src/db/seed.js --force"
   },
   "engines": {
     "bun": ">=1.2"

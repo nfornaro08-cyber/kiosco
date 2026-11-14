@@ -36,9 +36,5 @@ export function createSessionRepository(db) {
     deleteExpired(now = new Date().toISOString()) {
       db.prepare('DELETE FROM sessions WHERE expires_at <= ?').run(now);
     },
-
-    deleteForUser(userId) {
-      db.prepare('DELETE FROM sessions WHERE user_id = ?').run(userId);
-    },
   };
 }

@@ -134,10 +134,6 @@ export function errorBlock(message, retryAction = 'retry') {
   `;
 }
 
-export function fieldError(message) {
-  return message ? `<span class="field-error">${escapeHtml(message)}</span>` : '';
-}
-
 export function setButtonLoading(button, loading, loadingText = 'Guardando...') {
   if (!button) return;
   if (loading) {

@@ -39,10 +39,6 @@ export function createPaymentRepository(db) {
       );
     },
 
-    findByPreference(preferenceId) {
-      return map(db.prepare('SELECT * FROM payments WHERE preference_id = ?').get(preferenceId));
-    },
-
     findByExternalReference(ref) {
       return map(db.prepare('SELECT * FROM payments WHERE external_reference = ?').get(ref));
     },
@@ -63,12 +59,6 @@ export function createPaymentRepository(db) {
         'UPDATE payments SET status = ?, payment_method = COALESCE(?, payment_method), updated_at = ? WHERE id = ?',
       ).run(status, paymentMethod, now, id);
       return this.findById(id);
-    },
-
-    updateStatusByPreference(preferenceId, status, { paymentMethod = null } = {}) {
-      const payment = this.findByPreference(preferenceId);
-      if (!payment) return null;
-      return this.updateStatus(payment.id, status, { paymentMethod });
     },
   };
 }

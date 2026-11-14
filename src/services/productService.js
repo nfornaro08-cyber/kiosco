@@ -31,12 +31,6 @@ export function createProductService({ db }) {
       return products.list({ includeInactive: true, search, categoryId });
     },
 
-    getById(id) {
-      const product = products.findById(id);
-      if (!product) throw AppError.notFound('PRODUCT_NOT_FOUND', 'El producto no existe.');
-      return product;
-    },
-
     create(input) {
       const data = parseProductInput(input);
       ensureCategory(data.categoryId);

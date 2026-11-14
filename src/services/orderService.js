@@ -1,11 +1,9 @@
 import { AppError } from '../lib/errors.js';
 import { dateISO, integer, list, oneOf, text } from '../lib/validation.js';
 import { localDateISO } from '../lib/dates.js';
-import { generateOrderCode } from '../lib/orderCode.js';
 import { createOrderRepository } from '../repositories/orderRepository.js';
 import { createProductRepository } from '../repositories/productRepository.js';
 import { createRecreoRepository } from '../repositories/recreoRepository.js';
-import { createUserRepository } from '../repositories/userRepository.js';
 
 export const ORDER_STATUSES = ['pendiente', 'preparando', 'listo', 'entregado', 'cancelado'];
 
@@ -39,7 +37,6 @@ export function createOrderService({ db, config }) {
   const orders = createOrderRepository(db);
   const products = createProductRepository(db);
   const recreos = createRecreoRepository(db);
-  const users = createUserRepository(db);
 
   function restoreStock(order) {
     if (order.stockRestored) return;
@@ -104,26 +101,14 @@ export function createOrderService({ db, config }) {
         });
       }
 
-      let orderId = null;
-      for (let attempt = 0; attempt < 5 && orderId === null; attempt += 1) {
-        const code = generateOrderCode(new Date(), config.timeZone);
-        try {
-          orderId = orders.create({
-            code,
-            userId,
-            recreoId: cleanRecreoId,
-            serviceDate,
-            totalCents,
-            notes: cleanNotes,
-            paymentMethod: cleanPaymentMethod,
-          });
-        } catch (error) {
-          if (!String(error?.message ?? '').includes('UNIQUE')) throw error;
-        }
-      }
-      if (orderId === null) {
-        throw AppError.internal('No se pudo generar el código único del pedido. Intentá nuevamente.');
-      }
+      const orderId = orders.create({
+        userId,
+        recreoId: cleanRecreoId,
+        serviceDate,
+        totalCents,
+        notes: cleanNotes,
+        paymentMethod: cleanPaymentMethod,
+      });
 
       for (const line of preparedLines) {
         const reserved = products.decrementStock(line.productId, line.quantity);
@@ -225,7 +210,6 @@ export function createOrderService({ db, config }) {
       serviceDate,
       ordersToday: rows.reduce((total, row) => total + row.count, 0),
       activeOrders: byStatus.pendiente.count + byStatus.preparando.count + byStatus.listo.count,
-      pendingOrders: byStatus.pendiente.count,
       deliveredTodayCents: byStatus.entregado.amountCents,
       byStatus,
       lowStock: products.lowStock(5),
@@ -235,7 +219,6 @@ export function createOrderService({ db, config }) {
         amountCents: row.amount,
       })),
       recentOrders: orders.list({ limit: 8 }),
-      totalUsers: users.count(),
     };
   }
 

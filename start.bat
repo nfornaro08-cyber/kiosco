@@ -10,6 +10,13 @@ if %errorlevel%==0 (
   goto :end
 )
 
+rem Bun instalado con el instalador oficial (https://bun.sh)
+if exist "%USERPROFILE%\.bun\bin\bun.exe" (
+  "%USERPROFILE%\.bun\bin\bun.exe" run src/server.js
+  goto :end
+)
+
+rem Runtime portable (otras maquinas)
 set "BUN=%USERPROFILE%\bun-runtime\bun-windows-x64\bun.exe"
 if exist "%BUN%" (
   "%BUN%" run src/server.js

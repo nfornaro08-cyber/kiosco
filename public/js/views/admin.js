@@ -169,7 +169,7 @@ async function paintResumen(main, app) {
                         .map(
                           (order) => `
                           <tr>
-                            <td><strong>${escapeHtml(order.code)}</strong><br /><small>${escapeHtml(formatTime(order.createdAt))}</small></td>
+                            <td><strong>#${order.id}</strong><br /><small>${escapeHtml(formatTime(order.createdAt))}</small></td>
                             <td>${escapeHtml(order.userName ?? '')}</td>
                             <td>${escapeHtml(order.recreoName ?? '')}</td>
                             <td class="num">${money(order.totalCents)}</td>
@@ -197,7 +197,7 @@ async function paintResumen(main, app) {
                     .map((product) => {
                       const stock = stockLabel(product.stock);
                       return `<li>
-                        <span class="mini-emoji">${escapeHtml(product.emoji)}</span>
+                        ${product.emoji ? `<span class="mini-emoji">${escapeHtml(product.emoji)}</span>` : ''}
                         <span class="mini-info"><strong>${escapeHtml(product.name)}</strong><small>${escapeHtml(product.categoryName ?? 'Sin categoría')}</small></span>
                         <span class="stock-pill stock-${stock.tone}">${product.stock} u.</span>
                       </li>`;
@@ -243,7 +243,7 @@ function productRow(product) {
     <tr>
       <td>
         <div class="cell-product">
-          <span class="cell-emoji">${escapeHtml(product.emoji || '')}</span>
+          ${product.emoji ? `<span class="cell-emoji">${escapeHtml(product.emoji)}</span>` : ''}
           <div>
             <strong>${escapeHtml(product.name)}</strong>
             <small>${escapeHtml(product.description || 'Sin descripción')}</small>
@@ -347,7 +347,7 @@ function adminOrderCard(order) {
     <article class="admin-order">
       <div class="admin-order-main">
         <div class="admin-order-top">
-          <span class="order-code">${escapeHtml(order.code)}</span>
+          <span class="order-code">#${order.id}</span>
           ${statusBadge(order.status)}
           <span class="admin-order-date">${escapeHtml(formatDateTime(order.createdAt))}</span>
         </div>
@@ -540,7 +540,7 @@ async function paintCategorias(main, app) {
                   .map(
                     (category) => `
                     <li>
-                      <span class="category-emoji">${escapeHtml(category.emoji)}</span>
+                      ${category.emoji ? `<span class="category-emoji">${escapeHtml(category.emoji)}</span>` : ''}
                       <span class="mini-info">
                         <strong>${escapeHtml(category.name)}</strong>
                         <small>${category.productCount ?? 0} productos activos</small>
@@ -574,6 +574,7 @@ async function paintUsuarios(main, app) {
           <h1>Usuarios</h1>
           <p class="page-sub">${users.length} cuentas registradas en el kiosco.</p>
         </div>
+        <button type="button" class="btn btn-primary" data-action="new-user">+ Crear cuenta</button>
       </header>
 
       <div class="panel">
@@ -589,11 +590,12 @@ async function paintUsuarios(main, app) {
                     <td>${escapeHtml(user.email)}</td>
                     <td>${user.role === 'admin' ? '<span class="badge badge-amber">Administración</span>' : '<span class="badge badge-plain">Alumno</span>'}</td>
                     <td>${escapeHtml(formatDate(user.createdAt))}</td>
-
                     <td class="actions-col">
-
-                      ${user.role !== 'admin' ? `<button type="button" class="btn btn-ghost btn-sm danger-text" data-action="delete-user" data-id="${user.id}">Eliminar</button>` : ''}
-
+                      ${
+                        app.state.user && app.state.user.id === user.id
+                          ? '<span class="page-sub">Tu cuenta</span>'
+                          : `<button type="button" class="btn btn-ghost btn-sm danger-text" data-action="delete-user" data-id="${user.id}" data-name="${escapeHtml(user.name)}">Eliminar</button>`
+                      }
                     </td>
                   </tr>`,
                 )
@@ -624,6 +626,25 @@ async function handleAdminClick(event, { app, main, tab }) {
     case 'new-product':
       await openProductModal(app, null, repaint);
       return;
+
+    case 'new-user':
+      await openUserModal(app, repaint);
+      return;
+
+    case 'delete-user': {
+      const name = button.dataset.name || 'esta cuenta';
+      const confirmed = await confirmAction({
+        title: 'Eliminar cuenta',
+        message: `¿Eliminar la cuenta de "${name}"? Se borran también sus pedidos y no se puede deshacer.`,
+        confirmText: 'Eliminar cuenta',
+        danger: true,
+      });
+      if (!confirmed) return;
+      const result = await api.admin.deleteUser(id);
+      toast(`Cuenta eliminada: ${result.email}. Se borraron ${result.ordersDeleted} pedido(s).`, 'success');
+      await repaint();
+      return;
+    }
 
     case 'edit-product': {
       let product = cache.products.find((item) => item.id === id);
@@ -741,20 +762,6 @@ async function handleAdminClick(event, { app, main, tab }) {
       return;
     }
 
-    case 'delete-user': {
-      const confirmed = await confirmAction({
-        title: 'Eliminar usuario',
-        message: '¿Seguro que quer�s eliminar esta cuenta? Se borrar�n sus pedidos.',
-        confirmText: 'Eliminar',
-        danger: true,
-      });
-      if (!confirmed) return;
-      await api.admin.deleteUser(id);
-      toast('Usuario eliminado.');
-      await repaint();
-      return;
-    }
-
     case 'admin-status': {
       const status = button.dataset.status;
       if (status === 'cancelado') {
@@ -822,6 +829,93 @@ function clearFormErrors(form) {
     box.hidden = true;
     box.textContent = '';
   }
+}
+
+/** Modal para crear cuentas (admin o cliente) con cualquier correo. */
+async function openUserModal(app, onSaved) {
+  const modal = openModal({
+    title: 'Crear cuenta',
+    subtitle: 'Acepta cualquier correo, sin restriccion de dominio. La contrasena es obligatoria.',
+    content: `
+      <form id="user-form" class="form" novalidate>
+        <div class="field">
+          <label for="u-name">Nombre y apellido</label>
+          <input id="u-name" name="name" maxlength="60" required placeholder="Ej: Ana Perez" />
+        </div>
+
+        <div class="field">
+          <label for="u-email">Correo electronico</label>
+          <input id="u-email" name="email" type="email" maxlength="160" required placeholder="cualquier@correo.com" />
+        </div>
+
+        <div class="field">
+          <label for="u-password">Contrasena</label>
+          <input id="u-password" name="password" type="text" minlength="8" maxlength="128" required placeholder="Minimo 8 caracteres" autocomplete="new-password" />
+          <span class="label-hint">Compartila con la persona para que ingrese con "Soy administracion: ingresar con correo".</span>
+        </div>
+
+        <div class="field">
+          <label for="u-role">Rol</label>
+          <select id="u-role" name="role">
+            <option value="admin" selected>Administracion (ve todo el panel)</option>
+            <option value="cliente">Alumno (solo catalogo y pedidos)</option>
+          </select>
+        </div>
+
+        <p class="form-error" data-form-error hidden></p>
+      </form>
+    `,
+    footer: `
+      <button type="button" class="btn btn-ghost" data-close>Cancelar</button>
+      <button type="submit" form="user-form" class="btn btn-primary">Crear cuenta</button>
+    `,
+  });
+
+  const form = modal.root.querySelector('#user-form');
+  form.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    clearFormErrors(form);
+
+    const name = form.name.value.trim();
+    const email = form.email.value.trim();
+    const password = form.password.value;
+    const role = form.role.value;
+    const errorBox = form.querySelector('[data-form-error]');
+
+    if (name.length < 2) {
+      form.name.classList.add('is-invalid');
+      errorBox.textContent = 'Ingresá el nombre y apellido.';
+      errorBox.hidden = false;
+      return;
+    }
+    if (!email.includes('@') || email.length < 5) {
+      form.email.classList.add('is-invalid');
+      errorBox.textContent = 'Ingresá un correo válido.';
+      errorBox.hidden = false;
+      return;
+    }
+    if (password.length < 8) {
+      form.password.classList.add('is-invalid');
+      errorBox.textContent = 'La contraseña necesita al menos 8 caracteres.';
+      errorBox.hidden = false;
+      return;
+    }
+
+    const submitButton = modal.root.querySelector('[type="submit"]');
+    setButtonLoading(submitButton, true, 'Creando...');
+    try {
+      const { user } = await api.admin.createUser({ name, email, password, role });
+      toast(`Cuenta creada: ${user.email} (${user.role === 'admin' ? 'administración' : 'alumno'}).`, 'success');
+      modal.close();
+      await onSaved();
+    } catch (error) {
+      errorBox.textContent = error.message;
+      errorBox.hidden = false;
+      toast(error.message, 'error');
+    } finally {
+      setButtonLoading(submitButton, false);
+    }
+  });
 }
 
 async function openProductModal(app, product, onSaved) {

@@ -15,7 +15,6 @@ export function createOrderRepository(db) {
     if (!row) return null;
     return {
       id: row.id,
-      code: row.code,
       userId: row.user_id,
       userName: row.user_name ?? null,
       userEmail: row.user_email ?? null,
@@ -72,21 +71,14 @@ export function createOrderRepository(db) {
   return {
     findById,
 
-    findByCode(code) {
-      const order = map(db.prepare(`${BASE_SELECT} WHERE o.code = ? COLLATE NOCASE`).get(code));
-      if (!order) return null;
-      hydrate([order]);
-      return order;
-    },
-
-    create({ code, userId, recreoId, serviceDate, totalCents, notes = '', status = 'pendiente', paymentMethod = 'mercadopago' }) {
+    create({ userId, recreoId, serviceDate, totalCents, notes = '', status = 'pendiente', paymentMethod = 'mercadopago' }) {
       const now = new Date().toISOString();
       const result = db
         .prepare(
-          `INSERT INTO orders (code, user_id, recreo_id, service_date, status, total_cents, notes, stock_restored, payment_method, created_at, updated_at)
-           VALUES (?, ?, ?, ?, ?, ?, ?, 0, ?, ?, ?)`,
+          `INSERT INTO orders (user_id, recreo_id, service_date, status, total_cents, notes, stock_restored, payment_method, created_at, updated_at)
+           VALUES (?, ?, ?, ?, ?, ?, 0, ?, ?, ?)`,
         )
-        .run(code, userId, recreoId, serviceDate, status, totalCents, notes, paymentMethod, now, now);
+        .run(userId, recreoId, serviceDate, status, totalCents, notes, paymentMethod, now, now);
       return Number(result.lastInsertRowid);
     },
 
@@ -167,13 +159,6 @@ export function createOrderRepository(db) {
         .prepare('SELECT status, COUNT(*) AS total, COALESCE(SUM(total_cents), 0) AS amount FROM orders WHERE service_date = ? GROUP BY status')
         .all(serviceDate);
       return rows.map((row) => ({ status: row.status, count: row.total, amountCents: row.amount }));
-    },
-
-    countAll(serviceDate = null) {
-      if (serviceDate) {
-        return db.prepare('SELECT COUNT(*) AS total FROM orders WHERE service_date = ?').get(serviceDate).total;
-      }
-      return db.prepare('SELECT COUNT(*) AS total FROM orders').get().total;
     },
 
     topProducts(sinceDate, limit = 5) {

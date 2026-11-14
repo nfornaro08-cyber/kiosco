@@ -66,7 +66,7 @@ export function seedDatabase(db, { force = false } = {}) {
 
   const now = new Date().toISOString();
 
-  const admin = users.create({
+  users.create({
     name: config.seedAdmin.name,
     email: config.seedAdmin.email,
     passwordHash: hashPassword(config.seedAdmin.password),
@@ -100,7 +100,7 @@ export function seedDatabase(db, { force = false } = {}) {
     recreos.create({ ...recreo, createdAt: now });
   }
 
-  return { seeded: true, adminEmail: admin.email };
+  return { seeded: true };
 }
 
 // Ejecucion directa: bun run src/db/seed.js [--force]

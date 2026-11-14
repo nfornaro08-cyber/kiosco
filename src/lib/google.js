@@ -4,7 +4,7 @@ const TOKENINFO_URL = 'https://oauth2.googleapis.com/tokeninfo';
 const SCOPE = 'openid email profile';
 
 export function googleConfigured(config) {
-  return Boolean(config.auth?.google?.clientId && config.auth?.google?.clientSecret);
+  return Boolean(config.auth.google.clientId && config.auth.google.clientSecret);
 }
 
 /** URL para redirigir al usuario a la pantalla de eleccion de cuenta de Google. */

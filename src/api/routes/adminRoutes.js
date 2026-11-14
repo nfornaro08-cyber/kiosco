@@ -186,4 +186,27 @@ export function registerAdminRoutes(routes, ctx) {
       sendJson(res, 200, { users: auth.listUsers() });
     },
   });
+
+  // Crea cuentas (admin o cliente) con cualquier correo, desde el panel.
+  routes.push({
+    method: 'POST',
+    path: '/api/admin/users',
+    handler: async (req, res) => {
+      admin(req);
+      const body = await readJsonBody(req);
+      const user = auth.createAccount(body);
+      sendJson(res, 201, { user });
+    },
+  });
+
+  // Borra una cuenta (y sus pedidos y sesiones). No se puede borrar la propia.
+  routes.push({
+    method: 'DELETE',
+    path: '/api/admin/users/:id',
+    handler: async (req, res, { params }) => {
+      const session = admin(req);
+      const result = auth.deleteAccount(params.id, { actorId: session.user.id });
+      sendJson(res, 200, result);
+    },
+  });
 }

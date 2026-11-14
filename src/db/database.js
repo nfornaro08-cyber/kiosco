@@ -21,23 +21,7 @@ export function openDatabase(path) {
 
 /** Crea las tablas e indices si todavia no existen. */
 export function applySchema(db) {
-  const schema = readFileSync(SCHEMA_PATH, 'utf8');
-  db.exec(schema);
-
-  // Migracion liviana para bases ya existentes.
-  // Migracion de usuarios: google_sub.
-  const userColumns = db.prepare('PRAGMA table_info(users)').all().map((row) => row.name);
-  if (!userColumns.includes('google_sub')) {
-    db.exec('ALTER TABLE users ADD COLUMN google_sub TEXT;');
-  }
-
-  const columns = db.prepare('PRAGMA table_info(orders)').all().map((row) => row.name);
-  if (!columns.includes('payment_status')) {
-    db.exec("ALTER TABLE orders ADD COLUMN payment_status TEXT NOT NULL DEFAULT 'unpaid';");
-  }
-  if (!columns.includes('payment_method')) {
-    db.exec("ALTER TABLE orders ADD COLUMN payment_method TEXT NOT NULL DEFAULT 'mercadopago';");
-  }
+  db.exec(readFileSync(SCHEMA_PATH, 'utf8'));
 }
 
 export function closeDatabase(db) {

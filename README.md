@@ -1,134 +1,47 @@
-# 🥪 Kiosco del Recreo
+# 🥪 Kiosco del Recreo (Recreo Express)
 
-Sistema de kiosco escolar para consultar productos, reservar pedidos por recreo y seguir su estado. Incluye cuentas de alumno, panel de administración para productos/precios/stock, API HTTP y persistencia real en SQLite.
-
-Proyecto **Etapa 1**: catálogo + pedidos por recreo + administración + base de datos.
+Sistema de kiosco escolar: los alumnos consultan productos y precios, reservan pedidos para un recreo y siguen su estado; la administración gestiona catálogo, stock y pedidos. Todo con **frontend + backend + capa API + base de datos** bien separados.
 
 ---
 
-## 1. Funcionalidades
+## 1. Arquitectura
 
-### Alumno
-- Registro e inicio de sesión.
-- Catálogo con búsqueda, filtro por categoría y stock en vivo.
-- Carrito persistido en el navegador.
-- Elección del recreo en el que retira el pedido.
-- Confirmación del pedido con código único (`K-261101-7Q3F`) y total calculado en el servidor.
-- Lista de pedidos propios con estado en tiempo casi real (actualización cada 20 s).
-- Cancelación mientras el pedido está pendiente; el stock vuelve al kiosco.
-
-### Administración
-- Resumen del día: pedidos, pedidos en curso, recaudación y stock bajo.
-- Productos: alta, edición, precio, stock, categoría, emoji, disponibilidad y borrado/archivado.
-- Ajuste rápido de stock con `+` / `−`.
-- Pedidos: filtros por fecha, estado y recreo; avance de estado y cancelación.
-- Recreos: alta, edición, habilitación/deshabilitación y borrado.
-- Categorías: alta, edición y borrado.
-- Usuarios registrados.
-
----
-
-## 2. Arquitectura
-
-El navegador **nunca** accede a la base de datos. Todo pasa por la API HTTP; el backend concentra las reglas de negocio.
+El navegador **nunca** accede a la base de datos: solo habla con la API por HTTP (`fetch` + cookie de sesión).
 
 ```
-┌──────────────────────────────┐
-│ Frontend (public/)           │
-│ HTML + CSS + JS ES Modules   │
-│ SPA con hash routing         │
-└──────────────┬───────────────┘
-               │ fetch /api, cookie HttpOnly
-┌──────────────▼───────────────┐
-│ Capa API (src/api/)          │
-│ Router, guards, validación   │
-│ de sesión y rol              │
-└──────────────┬───────────────┘
-               │
-┌──────────────▼───────────────┐
-│ Backend / Servicios          │
-│ src/services/                │
-│ Reglas: total, stock,        │
-│ reservas, estados, permisos  │
-└──────────────┬───────────────┘
-               │
-┌──────────────▼───────────────┐
-│ Repositorios (src/repositories)│
-│ SQL parametrizado            │
-└──────────────┬───────────────┘
-               │
-┌──────────────▼───────────────┐
-│ SQLite (data/kiosco.sqlite)  │
-│ bun:sqlite, WAL, FKs         │
-└──────────────────────────────┘
+Frontend (public/)          HTML + CSS + JS ES Modules, SPA con hash routing
+        │  fetch /api, cookie HttpOnly
+Capa API (src/api/)         Router, guards de sesión/rol, respuestas JSON
+        │
+Backend (src/services/)     Reglas: totales, stock, estados, permisos
+        │
+Repositorios (src/repositories/)   SQL parametrizado
+        │
+SQLite (data/kiosco.sqlite) bun:sqlite, WAL, foreign keys
 ```
 
-### Capas
-
-| Capa | Ubicación | Responsabilidad |
-|---|---|---|
-| Frontend | `public/` | UI, ruteo, carrito, llamadas a la API |
-| API | `src/api/` | Rutas REST, cookies, autorización por rol, respuestas JSON |
-| Servicios | `src/services/` | Lógica de negocio y validaciones |
-| Repositorios | `src/repositories/` | Consultas SQL y mapeo de filas |
-| Base de datos | `src/db/` + `data/` | Esquema, seed y conexión SQLite |
-
-### Decisiones técnicas
-- **Bun** como runtime (sin `npm install`, sin dependencias externas).
-- `bun:sqlite` para la base, con `PRAGMA foreign_keys = ON` y `journal_mode = WAL`.
-- Dinero en **centavos enteros** (`price_cents`, `total_cents`) para evitar errores de punto flotante.
+**Decisiones técnicas**
+- **Bun** como runtime: sin `npm install`, sin dependencias externas.
+- Dinero en **centavos enteros** para evitar errores de punto flotante.
+- El total y los precios se recalculan **siempre en el servidor**: el cliente no puede imponerlos.
+- El stock se descuenta en una transacción con `UPDATE ... WHERE stock >= ?`; si una línea falla, no se reserva nada. Al cancelar, el stock se devuelve una sola vez (`stock_restored`).
 - Contraseñas con `scrypt` + salt; sesiones con token aleatorio guardado **hasheado** (SHA-256).
-- Cookie de sesión `kiosco_session` `HttpOnly`, `SameSite=Lax` (y `Secure` en producción).
-- El total y los precios unitarios se recalculan siempre en el servidor: el cliente no puede imponerlos.
-- El stock se descuenta dentro de una transacción `BEGIN IMMEDIATE` con `UPDATE ... WHERE stock >= ?`; si falla una línea, no se reserva nada.
-- Los pedidos cancelados restauran el stock una sola vez (`stock_restored`).
 
 ---
 
-## 3. Requisitos
+## 2. Cómo ejecutar
 
-- **Bun 1.2+** (probado con Bun 1.4.4 en Windows).
-- No hace falta Node.js, npm, Python ni base de datos externa.
-
-### Runtime portable ya instalado
-
-En este equipo Bun está en:
+Requisito: **Bun 1.2+** (`https://bun.sh`). No hace falta Node.js ni otra base de datos.
 
 ```
-C:\Users\PC\bun-runtime\bun-windows-x64\bun.exe
+start.bat          (doble clic, Windows)
 ```
-
-Los lanzadores `start.bat` y `start.ps1` lo detectan automáticamente. Si querés usar `bun` desde cualquier terminal, agregá esa carpeta al `PATH`:
-
-```powershell
-$env:PATH = "$env:USERPROFILE\bun-runtime\bun-windows-x64;$env:PATH"
-```
-
----
-
-## 4. Cómo ejecutar
-
-### Opción A: doble clic
-
-```
-start.bat
-```
-
-### Opción B: PowerShell
-
-```powershell
-powershell -ExecutionPolicy Bypass -File .\start.ps1
-```
-
-### Opción C: terminal con Bun en el PATH
-
+o:
 ```bash
 bun run start
 ```
 
-Abrí: **http://127.0.0.1:3000**
-
-En el primer arranque se crea `data/kiosco.sqlite` y se cargan los datos iniciales.
+Abrí **http://127.0.0.1:3000**. En el primer arranque se crea `data/kiosco.sqlite` con datos iniciales.
 
 ### Cuentas de prueba
 
@@ -136,8 +49,6 @@ En el primer arranque se crea `data/kiosco.sqlite` y se cargan los datos inicial
 |---|---|---|
 | Administración | `admin@kiosco.local` | `Admin1234` |
 | Alumno demo | `alumno@kiosco.local` | `Alumno1234` |
-
-> En producción cambiá estas credenciales con las variables `ADMIN_EMAIL`, `ADMIN_PASSWORD` y `ADMIN_NAME` antes del primer arranque.
 
 ### Scripts
 
@@ -147,64 +58,45 @@ En el primer arranque se crea `data/kiosco.sqlite` y se cargan los datos inicial
 | `bun run dev` | Inicia con recarga automática (`--watch`) |
 | `bun run seed` | Carga datos iniciales si la base está vacía |
 | `bun run reset` | Borra los datos y vuelve a sembrar la base |
-| `bun test` | Ejecuta las pruebas automatizadas |
-
-Con el runtime portable:
-
-```powershell
-& "$env:USERPROFILE\bun-runtime\bun-windows-x64\bun.exe" run start
-& "$env:USERPROFILE\bun-runtime\bun-windows-x64\bun.exe" test
-```
 
 ---
 
-## 5. Configuración
-
-Variables de entorno opcionales:
+## 3. Configuración (`.env`)
 
 | Variable | Default | Descripción |
 |---|---|---|
-| `HOST` | `127.0.0.1` | Interfaz de escucha (`0.0.0.0` para red local) |
-| `PORT` | `3000` | Puerto HTTP |
+| `HOST` / `PORT` | `127.0.0.1` / `3000` | Interfaz y puerto HTTP |
 | `DB_PATH` | `data/kiosco.sqlite` | Ruta del archivo SQLite |
-| `KIOSCO_TZ` | `America/Argentina/Buenos_Aires` | Zona horaria para fechas de servicio y códigos |
-| `SESSION_DAYS` | `7` | Duración de la sesión en días |
-| `NODE_ENV` | — | `production` activa cookies `Secure` |
-| `ADMIN_NAME` | `Administración` | Nombre del admin sembrado |
-| `ADMIN_EMAIL` | `admin@kiosco.local` | Correo del admin sembrado |
-| `ADMIN_PASSWORD` | `Admin1234` | Contraseña del admin sembrado |
-
-Ejemplo en PowerShell:
-
-```powershell
-$env:PORT = 3001
-$env:HOST = '0.0.0.0'
-.\start.bat
-```
+| `KIOSCO_TZ` | `America/Argentina/Buenos_Aires` | Zona horaria para las fechas de servicio |
+| `SESSION_DAYS` | `7` | Duración de la sesión |
+| `ADMIN_EMAIL` / `ADMIN_PASSWORD` | ver `.env.example` | Cuenta admin sembrada |
+| `PAYMENT_ACCESS_TOKEN` | — | Token de Mercado Pago (habilita pagos online) |
+| `PAYMENT_BASE_URL` | `http://127.0.0.1:3000` | URL pública para el retorno del checkout |
+| `PAYMENT_WEBHOOK_SECRET` | — | Opcional. Clave secreta de webhook de Mercado Pago: si se configura, el webhook valida la firma `x-signature` y rechaza notificaciones sin firma válida |
+| `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | — | Habilita "Ingresar con Google" |
+| `GOOGLE_ALLOWED_DOMAINS` | — | Dominios de correo permitidos, ej: `sanjoserosario.com.ar` |
 
 ---
 
-## 6. API REST
+## 4. API REST
 
-Base: `http://127.0.0.1:3000/api`
-
-Formato de éxito: objeto JSON con la entidad (`{ products }`, `{ order }`, etc.).
-Formato de error:
+Base: `http://127.0.0.1:3000/api`. Éxito: objeto JSON con la entidad. Error:
 
 ```json
-{ "error": { "code": "INSUFFICIENT_STOCK", "message": "No hay stock suficiente de ...", "details": {} } }
+{ "error": { "code": "INSUFFICIENT_STOCK", "message": "...", "details": {} } }
 ```
-
-Códigos usados: `201` creado, `400` validación, `401` sin sesión, `403` sin permiso, `404` no existe, `409` conflicto de negocio, `413` cuerpo demasiado grande, `429` demasiados intentos.
 
 ### Autenticación
 
 | Método | Ruta | Acceso | Descripción |
 |---|---|---|---|
-| `POST` | `/auth/register` | Público | Crea una cuenta de alumno e inicia sesión |
 | `POST` | `/auth/login` | Público | Inicia sesión y setea la cookie |
-| `POST` | `/auth/logout` | Público | Cierra la sesión y borra la cookie |
+| `POST` | `/auth/logout` | Público | Cierra la sesión |
 | `GET` | `/auth/me` | Público | Devuelve `{ user }` o `{ user: null }` |
+| `PUT` | `/auth/password` | Usuario | Cambia la contraseña |
+| `GET` | `/auth/google/status` | Público | ¿Login con Google configurado? |
+| `GET` | `/auth/google/start` | Público | Inicia el flujo OAuth |
+| `GET` | `/auth/google/callback` | Público | Recibe el código y crea la sesión |
 
 ### Catálogo (público)
 
@@ -215,225 +107,121 @@ Códigos usados: `201` creado, `400` validación, `401` sin sesión, `403` sin p
 | `GET` | `/categories` | Categorías con cantidad de productos |
 | `GET` | `/recreos` | Recreos habilitados |
 
-### Pedidos (requiere sesión de alumno o admin)
+### Pedidos (requiere sesión)
 
 | Método | Ruta | Descripción |
 |---|---|---|
 | `GET` | `/orders` | Pedidos del usuario autenticado |
-| `POST` | `/orders` | Crea un pedido: `{ recreoId, items:[{productId,quantity}], notes }` |
+| `POST` | `/orders` | Crea pedido: `{ recreoId, items:[{productId,quantity}], notes, paymentMethod }` |
 | `GET` | `/orders/:id` | Detalle; un alumno solo ve los propios |
 | `POST` | `/orders/:id/cancel` | Cancela y devuelve stock |
+| `POST` | `/orders/:id/pay` | Crea checkout de Mercado Pago |
+| `GET` | `/orders/:id/payment` | Estado del pago |
+| `POST` | `/webhooks/payments` | Webhook de Mercado Pago (público; valida la firma `x-signature` si `PAYMENT_WEBHOOK_SECRET` está configurado) |
 
-### Administración (requiere rol `admin`)
+### Administración (rol `admin`)
 
 | Método | Ruta | Descripción |
 |---|---|---|
-| `GET` | `/admin/products` | Todos los productos, incluidos inactivos (`search`) |
-| `POST` | `/admin/products` | Crea producto: `{ name, description, categoryId, priceCents, stock, emoji, active }` |
-| `PUT` | `/admin/products/:id` | Edita producto |
+| `GET`/`POST` | `/admin/products` | Lista (incluye inactivos) / crea producto |
+| `PUT`/`DELETE` | `/admin/products/:id` | Edita / borra (archiva si tiene pedidos) |
 | `PATCH` | `/admin/products/:id/stock` | Ajusta stock con `{ stock }` o `{ delta }` |
-| `DELETE` | `/admin/products/:id` | Borra o archiva si tiene pedidos |
-| `GET` | `/admin/categories` | Lista categorías |
-| `POST` | `/admin/categories` | Crea categoría: `{ name, emoji, sortOrder }` |
-| `PUT` | `/admin/categories/:id` | Edita categoría |
-| `DELETE` | `/admin/categories/:id` | Borra categoría (los productos quedan sin categoría) |
-| `GET` | `/admin/recreos` | Lista todos los recreos |
-| `POST` | `/admin/recreos` | Crea recreo: `{ name, startTime, endTime, active, sortOrder }` |
-| `PUT` | `/admin/recreos/:id` | Edita o habilita/deshabilita |
-| `DELETE` | `/admin/recreos/:id` | Borra o deshabilita si tiene pedidos |
+| `GET`/`POST`/`PUT`/`DELETE` | `/admin/categories[...]` | CRUD de categorías |
+| `GET`/`POST`/`PUT`/`DELETE` | `/admin/recreos[...]` | CRUD de recreos |
 | `GET` | `/admin/orders` | Pedidos. Query: `status`, `recreoId`, `date` (`YYYY-MM-DD` o `all`) |
 | `PATCH` | `/admin/orders/:id/status` | Cambia estado: `{ status }` |
+| `PATCH` | `/admin/orders/:id/payment` | Marca pago manual (efectivo): `{ status }` |
 | `GET` | `/admin/stats` | Resumen del día, stock bajo y más vendidos |
-| `GET` | `/admin/users` | Usuarios registrados |
-
-Ejemplo con `curl`:
-
-```bash
-curl -c cookies.txt -H "Content-Type: application/json" \
-  -d '{"email":"alumno@kiosco.local","password":"Alumno1234"}' \
-  http://127.0.0.1:3000/api/auth/login
-
-curl -b cookies.txt -H "Content-Type: application/json" \
-  -d '{"recreoId":1,"items":[{"productId":1,"quantity":1}],"notes":"Sin sal"}' \
-  http://127.0.0.1:3000/api/orders
-```
+| `GET`/`POST` | `/admin/users` | Lista cuentas / crea cuenta con rol |
+| `DELETE` | `/admin/users/:id` | Borra cuenta y sus pedidos (no la propia) |
 
 ---
 
-## 7. Reglas de negocio
+## 5. Reglas de negocio
 
-### Totales
-- Cada producto guarda `price_cents`.
-- Al crear un pedido, el servidor toma el precio actual de la base, multiplica por la cantidad y suma.
-- El total enviado por el cliente se ignora.
-- Cada ítem guarda una foto del precio unitario (`unit_price_cents`) y el subtotal.
-
-### Stock
-- Se valida producto activo, stock suficiente y recreo habilitado.
-- La creación ocurre en una transacción: si una línea falla, no se descuenta ninguna.
-- La cancelación restaura el stock una sola vez.
-- Los productos con pedidos se **archivan** (`active = 0`) en lugar de borrarse.
-
-### Estados
-
-```
-pendiente ──► preparando ──► listo ──► entregado
-    │              │            │
-    └──────────────┴────────────┴──► cancelado
-```
-
-- El alumno solo puede cancelar en `pendiente`.
-- El admin puede cancelar en `pendiente`, `preparando` y `listo`.
-- Un pedido `entregado` o `cancelado` es final.
-- Transiciones inválidas devuelven `409 INVALID_TRANSITION`.
-
-### Fechas y códigos
-- `service_date` se calcula con la zona horaria configurada (`KIOSCO_TZ`).
-- El código es legible: `K-AAMMDD-XXXX` (por ejemplo `K-261101-7Q3F`).
-- El formato se genera en el servidor y se reintenta si colisiona.
+- **Totales**: el servidor toma el precio actual de la base, multiplica por cantidad y suma. Cada ítem guarda una foto del precio (`unit_price_cents`).
+- **Stock**: se valida producto activo + stock suficiente + recreo habilitado, todo en una transacción.
+- **Estados**: `pendiente → preparando → listo → entregado`, con `cancelado` desde cualquier estado previo (el admin también desde `listo`). El alumno solo cancela en `pendiente`. Transición inválida → `409`.
+- **Identificación**: cada pedido se identifica por su número (`#${id}`) asignado por la base.
+- Los productos y recreos con pedidos asociados se **archivan** en lugar de borrarse.
 
 ---
 
-## 8. Base de datos
+## 6. Base de datos
 
-Archivo: `data/kiosco.sqlite` (se crea automáticamente).
+Archivo `data/kiosco.sqlite` (se crea solo). Tablas: `users`, `sessions`, `categories`, `products`, `recreos`, `orders`, `order_items`, `payments`. Esquema completo en `src/db/schema.sql`, datos iniciales en `src/db/seed.js`.
 
-Tablas:
-
-| Tabla | Contenido |
-|---|---|
-| `users` | Cuentas, hash de contraseña, rol |
-| `sessions` | Hash del token, vencimiento |
-| `categories` | Categorías del catálogo |
-| `products` | Nombre, precio en centavos, stock, categoría, activo |
-| `recreos` | Nombre, horario, activo |
-| `orders` | Código, usuario, recreo, fecha, total, estado |
-| `order_items` | Detalle con precio unitario y subtotal |
-
-El esquema completo está en `src/db/schema.sql` y los datos iniciales en `src/db/seed.js`.
-
-### Reiniciar la base
-
-```bash
-bun run reset
-```
-
-o:
-
-```powershell
-& "$env:USERPROFILE\bun-runtime\bun-windows-x64\bun.exe" run src/db/seed.js --force
-```
+Reiniciar la base: `bun run reset`.
 
 ---
 
-## 9. Pruebas
-
-```bash
-bun test
-```
-
-Se ejecutan 20 pruebas contra una base SQLite **en memoria**:
-
-- Cálculo del total en el servidor e ignorancia del total del cliente.
-- Descuento de stock y agrupación de ítems repetidos.
-- Rechazo por stock insuficiente sin efectos parciales.
-- Productos inactivos/inexistentes y recreos inválidos.
-- Restauración de stock al cancelar, una sola vez.
-- Permisos de cancelación (alumno vs admin) y pedidos entregados.
-- Transiciones de estado válidas e inválidas.
-- Aislamiento de pedidos entre alumnos.
-- CRUD de productos, categorías y recreos, incluyendo el guardado sin cambiar el nombre.
-
-También existe una prueba de humo HTTP manual usada durante el desarrollo que recorre login, permisos, catálogo, pedidos, cancelación, estados y CRUD: **72 comprobaciones, todas aprobadas**.
-
----
-
-## 10. Estructura del proyecto
+## 7. Estructura del proyecto
 
 ```
 .
-├── public/
+├── public/                    # Frontend (solo UI, cero SQL)
 │   ├── index.html
 │   ├── favicon.svg
 │   ├── css/styles.css
 │   └── js/
-│       ├── api.js            # Cliente HTTP
-│       ├── app.js            # Estado SPA, ruteo, carrito
-│       ├── ui.js             # Toasts, modales, loaders
-│       ├── utils.js          # Formato de dinero/fechas/estados
-│       └── views/
-│           ├── auth.js
-│           ├── catalog.js
-│           ├── orders.js
-│           └── admin.js
+│       ├── api.js             # Cliente HTTP de la API
+│       ├── app.js             # Estado SPA, ruteo, carrito
+│       ├── ui.js              # Toasts, modales, loaders
+│       ├── utils.js           # Formato de dinero/fechas/estados
+│       └── views/             # auth, catalog, orders, admin
 ├── src/
-│   ├── server.js             # Entrada HTTP
-│   ├── app.js                # Ensamblado de DB + servicios + API
+│   ├── server.js              # Entrada HTTP
+│   ├── app.js                 # Ensamblado de DB + servicios + API
 │   ├── config.js
-│   ├── api/
-│   │   ├── index.js
-│   │   ├── router.js
-│   │   ├── guards.js
-│   │   ├── staticFiles.js
-│   │   └── routes/           # auth, catalog, orders, admin
-│   ├── services/             # Reglas de negocio
-│   ├── repositories/         # SQL
-│   ├── db/                   # schema.sql, database.js, seed.js
-│   └── lib/                  # errors, http, validation, password, tokens...
-├── tests/
-│   ├── orderService.test.js
-│   └── adminServices.test.js
-├── data/                     # SQLite (se crea al iniciar)
+│   ├── api/                   # Capa API: router, guards, rutas, estáticos
+│   ├── services/              # Backend: reglas de negocio
+│   ├── repositories/          # SQL
+│   ├── db/                    # schema.sql, database.js, seed.js
+│   └── lib/                   # errors, http, validation, password, google, mercadopago...
+├── data/                      # SQLite (se crea al iniciar)
 ├── start.bat
-├── start.ps1
-├── package.json
-└── README.md
+├── Dockerfile / railway.json  # Deploy (Railway)
+└── package.json
 ```
 
 ---
 
-## 11. Mapeo con la Etapa 1
+## 8. Mapeo con el trabajo integrador
 
 | Requisito | Dónde se cumple |
 |---|---|
-| Los usuarios deben iniciar sesión | Login/registro con cookie HttpOnly y sesiones en SQLite |
-| Cuenta admin que agrega/edita productos, precios y stock | Panel `/admin/productos` + endpoints `/api/admin/products` |
-| Listar productos y precios | Catálogo público en `/api/products` y vista Catálogo |
-| Registrar pedidos para un recreo | `POST /api/orders` con `recreoId` y validación de recreo activo |
-| Consultar estado del pedido | `GET /api/orders` + vista Mis pedidos con timeline |
-| Administrar productos/precios/stock | CRUD de productos y ajuste de stock desde el panel |
-| Persistir todo en base de datos | SQLite con 7 tablas y transacciones |
-| Separación frontend / backend / API / base de datos | Carpetas `public`, `src/services`, `src/api`, `src/db` |
-| El frontend no accede a la base directamente | Solo usa `fetch` a `/api`; el servidor estático sirve únicamente `public/` |
+| Consultar productos y precios | Catálogo público (`/api/products`) |
+| Registrar pedidos para un recreo y consultar estado | `POST /api/orders` + vista "Mis pedidos" con timeline |
+| Administrar productos, precios y stock | Panel admin + endpoints `/api/admin/*` |
+| Guardar y recuperar información en una base de datos | SQLite (`src/db/`) |
+| Diferenciar frontend / backend / API | `public/`, `src/services/`, `src/api/` |
+| El frontend no accede directo a la base | Solo usa `fetch` a `/api`; el servidor estático sirve únicamente `public/` |
+
+**Etapa 2 (extras implementados)**
+- **Pagos online con Mercado Pago**: checkout real (Orders API), webhook para confirmar el pago y marcado manual de pagos en efectivo.
+- **Integración con Google**: login OAuth con verificación de `id_token` y restricción por dominio del colegio.
 
 ---
 
-## 12. Seguridad implementada
+## 9. Seguridad
 
-- Contraseñas con `scrypt` y salt aleatorio; comparación en tiempo constante.
-- Tokens de sesión aleatorios de 256 bits; en la base solo se guarda su hash.
-- Cookie `HttpOnly`, `SameSite=Lax` y `Secure` en producción.
-- Rate limit de login: 8 intentos fallidos por IP + correo en 5 minutos (`429`).
-- Validación y normalización de todas las entradas en el backend.
-- Consultas SQL siempre parametrizadas.
+- `scrypt` + salt para contraseñas; comparación en tiempo constante.
+- Tokens de sesión de 256 bits; en la base solo se guarda su hash.
+- Cookie `HttpOnly`, `SameSite=Lax` (y `Secure` en producción).
+- Rate limit de login: 8 intentos por IP + correo en 5 minutos (`429`).
+- Validación de todas las entradas y SQL siempre parametrizado.
 - Autorización por rol en cada ruta de administración.
-- `Content-Security-Policy`, `X-Frame-Options: DENY`, `nosniff` y `Permissions-Policy`.
-- El servidor estático resuelve rutas dentro de `public/` y bloquea path traversal.
-- Límite de 1 MB para cuerpos JSON.
-- Los errores internos no exponen detalles al cliente.
+- CSP, `X-Frame-Options: DENY`, `nosniff`, `Permissions-Policy`, límite de 1 MB por cuerpo JSON.
+- Webhook de pagos: valida la firma HMAC-SHA256 (`x-signature`) de Mercado Pago cuando se configura `PAYMENT_WEBHOOK_SECRET`; además, toda notificación se verifica consultando la API del proveedor antes de cambiar el estado del pago.
+- El servidor estático bloquea path traversal fuera de `public/`.
 
 ---
 
-## 13. Problemas comunes
+## 10. Problemas comunes
 
 | Problema | Solución |
 |---|---|
-| `El puerto 3000 ya está en uso` | Cerrá el otro proceso o iniciá con `set PORT=3001 && start.bat` |
-| PowerShell bloquea `start.ps1` | Usá `powershell -ExecutionPolicy Bypass -File .\start.ps1` o `start.bat` |
-| `No se encontro Bun` | Verificá que exista `%USERPROFILE%\bun-runtime\bun-windows-x64\bun.exe` o agregá Bun al `PATH` |
-| La base quedó con datos de prueba | Ejecutá `bun run reset` |
-| No se ven cambios del frontend | Recargá con `Ctrl+F5` (el servidor no cachea HTML/JS) |
-
----
-
-Hecho con Bun + SQLite + JavaScript vanilla. Sin dependencias externas.
+| `El puerto 3000 ya está en uso` | Cerrá el otro proceso o: `set PORT=3001 && start.bat` |
+| `No se encontro Bun` | Instalalo desde https://bun.sh o usá el runtime portable |
+| La base quedó con datos de prueba | `bun run reset` |
+| No se ven cambios del frontend | Recargá con `Ctrl+F5` |

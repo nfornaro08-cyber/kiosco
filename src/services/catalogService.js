@@ -13,10 +13,6 @@ export function createCatalogService({ db }) {
       return products.list({ categoryId, search, onlyAvailable });
     },
 
-    getProduct(id) {
-      return products.findById(id);
-    },
-
     listCategories() {
       return categories.list();
     },
