@@ -66,6 +66,17 @@ export function createAuthService({ db, config }) {
     const cleanEmail = parseEmail(email);
     const cleanPassword = parsePassword(password);
 
+    const allowedDomains = config.auth?.google?.allowedDomains ?? [];
+    if (allowedDomains.length > 0) {
+      const domain = cleanEmail.split('@')[1]?.toLowerCase() ?? '';
+      if (!allowedDomains.includes(domain)) {
+        throw AppError.forbidden(
+          'DOMAIN_NOT_ALLOWED',
+          `Solo pueden registrarse cuentas ${allowedDomains.map((d) => `@${d}`).join(', ')}.`,
+        );
+      }
+    }
+
     if (users.findByEmail(cleanEmail)) {
       throw AppError.conflict('EMAIL_IN_USE', 'Ya existe una cuenta registrada con ese correo.');
     }
@@ -184,9 +195,24 @@ export function createAuthService({ db, config }) {
     return googleLogin(profile);
   }
 
+  function deleteAccount(id, { actorId } = {}) {
+    const target = users.findById(Number(id));
+    if (!target) throw AppError.notFound('USER_NOT_FOUND', 'El usuario no existe.');
+    if (Number(id) === Number(actorId)) {
+      throw AppError.badRequest('DELETE_SELF', 'No podés borrar tu propia cuenta mientras estás logueado.');
+    }
+
+    db.prepare('DELETE FROM order_items WHERE order_id IN (SELECT id FROM orders WHERE user_id = ?)').run(target.id);
+    db.prepare('DELETE FROM orders WHERE user_id = ?').run(target.id);
+    db.prepare('DELETE FROM sessions WHERE user_id = ?').run(target.id);
+    db.prepare('DELETE FROM users WHERE id = ?').run(target.id);
+
+    return { deleted: true, email: target.email };
+  }
+
   function listUsers() {
     return users.list().map(publicUser);
   }
 
-  return { register, login, resolveSession, logout, cleanup, listUsers, publicUser, changePassword, resetAdminPassword, googleConfigured: () => (config.auth?.google?.clientId && config.auth?.google?.clientSecret) ? true : false, getGoogleAuthorizeUrl, handleGoogleCallback };
+  return { register, login, resolveSession, logout, cleanup, listUsers, publicUser, changePassword, resetAdminPassword, deleteAccount, googleConfigured: () => (config.auth?.google?.clientId && config.auth?.google?.clientSecret) ? true : false, getGoogleAuthorizeUrl, handleGoogleCallback };
 }

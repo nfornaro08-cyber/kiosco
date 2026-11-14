@@ -769,5 +769,6 @@ export const api = {
 
     getStats: () => request('/admin/stats'),
     getUsers: () => request('/admin/users'),
+    deleteUser: (id) => request(`/admin/users/${id}`, { method: 'DELETE' }),
   },
 };

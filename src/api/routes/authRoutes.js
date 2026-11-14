@@ -1,4 +1,5 @@
 import { readJsonBody, sendJson, serializeCookie } from '../../lib/http.js';
+import { AppError } from '../../lib/errors.js';
 import { optionalSession, requireUser } from '../guards.js';
 
 export function registerAuthRoutes(routes, ctx) {
@@ -126,6 +127,19 @@ export function registerAuthRoutes(routes, ctx) {
         newPassword: body.newPassword,
       });
       sendJson(res, 200, { ok: true });
+    },
+  });
+
+  routes.push({
+    method: 'DELETE',
+    path: '/api/admin/users/:id',
+    handler: async (req, res, { params }) => {
+      const session = requireUser(ctx, req);
+      if (session.user.role !== 'admin') {
+        throw AppError.forbidden('ADMIN_REQUIRED', 'Necesitas una cuenta de administrador.');
+      }
+      const result = auth.deleteAccount(params.id, { actorId: session.user.id });
+      sendJson(res, 200, result);
     },
   });
 }

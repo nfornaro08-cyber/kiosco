@@ -721,7 +721,8 @@ var api = {
     updateOrderStatus: (id, status) => request(`/admin/orders/${id}/status`, { method: "PATCH", body: { status } }),
     updatePaymentStatus: (id, status) => request(`/admin/orders/${id}/payment`, { method: "PATCH", body: { status } }),
     getStats: () => request("/admin/stats"),
-    getUsers: () => request("/admin/users")
+    getUsers: () => request("/admin/users"),
+    deleteUser: (id) => request(`/admin/users/${id}`, { method: "DELETE" })
   }
 };
 
@@ -1830,7 +1831,7 @@ async function paintUsuarios(main, app) {
       <div class="panel">
         <div class="table-scroll">
           <table class="data-table">
-            <thead><tr><th>Nombre</th><th>Correo</th><th>Rol</th><th>Alta</th></tr></thead>
+            <thead><tr><th>Nombre</th><th>Correo</th><th>Rol</th><th>Alta</th><th class="actions-col">Acciones</th></tr></thead>
             <tbody>
               ${users.map((user) => `
                   <tr>
@@ -1838,6 +1839,12 @@ async function paintUsuarios(main, app) {
                     <td>${escapeHtml(user.email)}</td>
                     <td>${user.role === "admin" ? '<span class="badge badge-amber">Administración</span>' : '<span class="badge badge-plain">Alumno</span>'}</td>
                     <td>${escapeHtml(formatDate(user.createdAt))}</td>
+
+                    <td class="actions-col">
+
+                      ${user.role !== "admin" ? `<button type="button" class="btn btn-ghost btn-sm danger-text" data-action="delete-user" data-id="${user.id}">Eliminar</button>` : ""}
+
+                    </td>
                   </tr>`).join("")}
             </tbody>
           </table>
@@ -1966,6 +1973,20 @@ async function handleAdminClick(event, { app, main, tab }) {
       await api.admin.updatePaymentStatus(id, "approved");
       toast("Pago marcado como recibido.");
       await app.loadCatalog();
+      await repaint();
+      return;
+    }
+    case "delete-user": {
+      const confirmed = await confirmAction({
+        title: "Eliminar usuario",
+        message: "¿Seguro que quer�s eliminar esta cuenta? Se borrar�n sus pedidos.",
+        confirmText: "Eliminar",
+        danger: true
+      });
+      if (!confirmed)
+        return;
+      await api.admin.deleteUser(id);
+      toast("Usuario eliminado.");
       await repaint();
       return;
     }
