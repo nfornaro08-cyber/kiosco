@@ -28,11 +28,12 @@ function renderTimeline(order) {
 }
 
 function renderOrderCard(order) {
+  const delivered = order.status === 'entregado';
   return `
-    <article class="order-card" data-order-card="${order.id}">
+    <article class="order-card ${delivered ? 'is-delivered' : ''}" data-order-card="${order.id}" data-status="${escapeHtml(order.status)}">
       <header class="order-head">
         <div>
-          <p class="order-code">#${order.id}</p>
+          <p class="order-code">Código: ${escapeHtml(order.code || ('#' + order.id))}</p>
           <p class="order-when">
             ${escapeHtml(order.recreoName ?? 'Recreo')} · ${escapeHtml(order.recreoStartTime ?? '')}–${escapeHtml(order.recreoEndTime ?? '')}
             · ${escapeHtml(formatLongDate(order.serviceDate))}
@@ -70,9 +71,14 @@ function renderOrderCard(order) {
           ${
             order.paymentMethod === 'cash'
               ? `<span class="badge badge-plain">Pago en efectivo</span>`
-              : order.status === 'pendiente' && (!order.paymentStatus || order.paymentStatus === 'unpaid' || order.paymentStatus === 'rejected')
-                ? `<button type="button" class="btn btn-primary btn-sm" data-action="pay-order" data-id="${order.id}">Pagar</button>`
+              : order.status === 'pendiente' && ['unpaid', 'pending', 'rejected', 'cancelled'].includes(order.paymentStatus || 'unpaid')
+                ? `<button type="button" class="btn btn-primary btn-sm" data-action="pay-order" data-id="${order.id}">${order.paymentStatus === 'pending' ? 'Reintentar pago' : 'Pagar con Mercado Pago'}</button>`
                 : ''
+          }
+          ${
+            order.paymentMethod !== 'cash' && order.paymentStatus === 'pending' && order.status === 'pendiente'
+              ? `<span class="badge badge-amber">Pago pendiente: podés reintentar si no se completó</span>`
+              : ''
           }
           ${
             order.status === 'pendiente'

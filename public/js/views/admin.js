@@ -48,7 +48,7 @@ const NEXT_STATUS = {
     { status: 'listo', label: 'Marcar listo', className: 'btn-soft' },
   ],
   preparando: [{ status: 'listo', label: 'Marcar listo', className: 'btn-primary' }],
-  listo: [{ status: 'entregado', label: 'Entregar', className: 'btn-primary' }],
+  listo: [{ status: 'entregado', label: 'Entregar pedido (código)', className: 'btn-primary' }],
   entregado: [],
   cancelado: [],
 };

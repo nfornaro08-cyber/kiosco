@@ -34,14 +34,16 @@ export function createPaymentService({ db, config }) {
       throw AppError.conflict('PAYMENT_ALREADY_APPROVED', 'Este pedido ya fue pagado.');
     }
 
-    const payment = existing && existing.status === 'pending'
-      ? existing
-      : payments.create({
-          orderId: order.id,
-          provider: config.payments.provider,
-          amountCents: order.totalCents,
-          externalReference: `order-${order.id}`,
-        });
+    // Permite reintentar aunque el intento anterior haya quedado pendiente/no pagado.
+    const payment =
+      existing && existing.status !== 'approved'
+        ? payments.updateStatus(existing.id, 'pending', { paymentMethod: null })
+        : payments.create({
+            orderId: order.id,
+            provider: config.payments.provider,
+            amountCents: order.totalCents,
+            externalReference: `order-${order.id}`,
+          });
 
     let result;
     try {

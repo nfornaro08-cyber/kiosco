@@ -1365,6 +1365,16 @@ body.is-auth .view {
   overflow: hidden;
 }
 
+.order-card.is-delivered {
+  border-color: #22c55e;
+  background: linear-gradient(180deg, #f0fdf4 0%, #ffffff 38%);
+  box-shadow: 0 0 0 1px rgba(34, 197, 94, 0.18), var(--shadow-sm);
+}
+
+.order-card.is-delivered .order-code {
+  color: #166534;
+}
+
 .order-head {
   display: flex;
   align-items: flex-start;
