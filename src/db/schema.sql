@@ -59,6 +59,7 @@ CREATE TABLE IF NOT EXISTS recreos (
 
 CREATE TABLE IF NOT EXISTS orders (
   id             INTEGER PRIMARY KEY AUTOINCREMENT,
+  code           TEXT    NOT NULL UNIQUE,
   user_id        INTEGER NOT NULL REFERENCES users(id),
   recreo_id      INTEGER NOT NULL REFERENCES recreos(id),
   service_date   TEXT    NOT NULL,

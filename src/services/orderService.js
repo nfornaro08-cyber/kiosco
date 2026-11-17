@@ -1,6 +1,7 @@
 import { AppError } from '../lib/errors.js';
 import { dateISO, integer, list, oneOf, text } from '../lib/validation.js';
 import { localDateISO } from '../lib/dates.js';
+import { generateOrderCode } from '../lib/orderCode.js';
 import { createOrderRepository } from '../repositories/orderRepository.js';
 import { createProductRepository } from '../repositories/productRepository.js';
 import { createRecreoRepository } from '../repositories/recreoRepository.js';
@@ -101,14 +102,26 @@ export function createOrderService({ db, config }) {
         });
       }
 
-      const orderId = orders.create({
-        userId,
-        recreoId: cleanRecreoId,
-        serviceDate,
-        totalCents,
-        notes: cleanNotes,
-        paymentMethod: cleanPaymentMethod,
-      });
+      let orderId = null;
+      for (let attempt = 0; attempt < 20 && orderId === null; attempt += 1) {
+        const code = generateOrderCode();
+        try {
+          orderId = orders.create({
+            code,
+            userId,
+            recreoId: cleanRecreoId,
+            serviceDate,
+            totalCents,
+            notes: cleanNotes,
+            paymentMethod: cleanPaymentMethod,
+          });
+        } catch (error) {
+          if (!String(error?.message ?? '').includes('UNIQUE')) throw error;
+        }
+      }
+      if (orderId === null) {
+        throw AppError.internal('No se pudo generar un código de pedido único. Intentá nuevamente.');
+      }
 
       for (const line of preparedLines) {
         const reserved = products.decrementStock(line.productId, line.quantity);

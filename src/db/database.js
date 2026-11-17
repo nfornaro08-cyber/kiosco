@@ -19,9 +19,44 @@ export function openDatabase(path) {
   return db;
 }
 
+function randomSixDigitCode() {
+  return String(Math.floor(Math.random() * 1000000)).padStart(6, '0');
+}
+
 /** Crea las tablas e indices si todavia no existen. */
 export function applySchema(db) {
   db.exec(readFileSync(SCHEMA_PATH, 'utf8'));
+
+  // Migración: agregar código de 6 dígitos a pedidos existentes.
+  const orderColumns = db.prepare('PRAGMA table_info(orders)').all().map((row) => row.name);
+  if (!orderColumns.includes('code')) {
+    db.exec('ALTER TABLE orders ADD COLUMN code TEXT;');
+    const rows = db.prepare('SELECT id FROM orders WHERE code IS NULL OR code = "" ORDER BY id').all();
+    const used = new Set(
+      db
+        .prepare("SELECT code FROM orders WHERE code IS NOT NULL AND code != ''")
+        .all()
+        .map((r) => r.code),
+    );
+    const update = db.prepare('UPDATE orders SET code = ? WHERE id = ?');
+    for (const row of rows) {
+      let code = String(row.id % 1000000).padStart(6, '0');
+      let attempts = 0;
+      while (used.has(code) && attempts < 2000) {
+        code = randomSixDigitCode();
+        attempts += 1;
+      }
+      // Fallback extremo si hay colisiones inusuales.
+      while (used.has(code)) {
+        code = randomSixDigitCode();
+      }
+      used.add(code);
+      update.run(code, row.id);
+    }
+    db.exec('CREATE UNIQUE INDEX IF NOT EXISTS idx_orders_code ON orders(code);');
+  } else {
+    db.exec('CREATE UNIQUE INDEX IF NOT EXISTS idx_orders_code ON orders(code);');
+  }
 }
 
 export function closeDatabase(db) {

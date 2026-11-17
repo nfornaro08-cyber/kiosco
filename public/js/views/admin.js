@@ -169,7 +169,7 @@ async function paintResumen(main, app) {
                         .map(
                           (order) => `
                           <tr>
-                            <td><strong>#${order.id}</strong><br /><small>${escapeHtml(formatTime(order.createdAt))}</small></td>
+                            <td><strong>${escapeHtml(order.code || "#" + order.id)}</strong><br /><small>${escapeHtml(formatTime(order.createdAt))}</small></td>
                             <td>${escapeHtml(order.userName ?? '')}</td>
                             <td>${escapeHtml(order.recreoName ?? '')}</td>
                             <td class="num">${money(order.totalCents)}</td>
@@ -347,7 +347,7 @@ function adminOrderCard(order) {
     <article class="admin-order">
       <div class="admin-order-main">
         <div class="admin-order-top">
-          <span class="order-code">#${order.id}</span>
+          <span class="order-code">Código: ${escapeHtml(order.code || "#" + order.id)}</span>
           ${statusBadge(order.status)}
           <span class="admin-order-date">${escapeHtml(formatDateTime(order.createdAt))}</span>
         </div>

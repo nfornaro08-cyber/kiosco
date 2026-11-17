@@ -15,6 +15,7 @@ export function createOrderRepository(db) {
     if (!row) return null;
     return {
       id: row.id,
+      code: row.code ?? null,
       userId: row.user_id,
       userName: row.user_name ?? null,
       userEmail: row.user_email ?? null,
@@ -71,14 +72,14 @@ export function createOrderRepository(db) {
   return {
     findById,
 
-    create({ userId, recreoId, serviceDate, totalCents, notes = '', status = 'pendiente', paymentMethod = 'mercadopago' }) {
+    create({ code, userId, recreoId, serviceDate, totalCents, notes = '', status = 'pendiente', paymentMethod = 'mercadopago' }) {
       const now = new Date().toISOString();
       const result = db
         .prepare(
-          `INSERT INTO orders (user_id, recreo_id, service_date, status, total_cents, notes, stock_restored, payment_method, created_at, updated_at)
-           VALUES (?, ?, ?, ?, ?, ?, 0, ?, ?, ?)`,
+          `INSERT INTO orders (code, user_id, recreo_id, service_date, status, total_cents, notes, stock_restored, payment_method, created_at, updated_at)
+           VALUES (?, ?, ?, ?, ?, ?, ?, 0, ?, ?, ?)`,
         )
-        .run(userId, recreoId, serviceDate, status, totalCents, notes, paymentMethod, now, now);
+        .run(code, userId, recreoId, serviceDate, status, totalCents, notes, paymentMethod, now, now);
       return Number(result.lastInsertRowid);
     },
 

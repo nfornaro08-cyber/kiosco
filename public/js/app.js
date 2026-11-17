@@ -653,7 +653,7 @@ const app = {
       localStorage.removeItem(NOTES_KEY);
       this.closeCart();
 
-      toast(`Pedido #${order.id} confirmado`, 'success', 6000);
+      toast(`Pedido ${order.code || "#" + order.id} confirmado`, 'success', 6000);
       this.showOrderSuccess(order);
 
       await Promise.allSettled([this.loadCatalog(), this.loadOrders()]);
@@ -678,8 +678,8 @@ const app = {
       subtitle: 'Ya quedó registrado en el kiosco.',
       content: `
         <div class="success-order">
-          <p class="success-label">Pedido</p>
-          <p class="success-code">#${order.id}</p>
+          <p class="success-label">Código de pedido</p>
+          <p class="success-code">${escapeHtml(order.code || "#" + order.id)}</p>
           <p class="success-meta">${escapeHtml(order.recreoName ?? '')} · ${escapeHtml(formatLongDate(order.serviceDate))}</p>
           <ul class="order-items success-items">
             ${order.items
@@ -689,7 +689,7 @@ const app = {
               .join('')}
           </ul>
           <p class="success-total"><span>Total</span><strong>${money(order.totalCents)}</strong></p>
-          <p class="success-note">Mostrá este número al retirar tu pedido. Podés seguir su estado en “Mis pedidos”.</p>
+          <p class="success-note">Mostrá este código al retirar tu pedido. Podés seguir su estado en "Mis pedidos".</p>
         </div>
       `,
       footer: `
