@@ -40,15 +40,14 @@ export function applySchema(db) {
     );
     const update = db.prepare('UPDATE orders SET code = ? WHERE id = ?');
     for (const row of rows) {
-      let code = String(row.id % 1000000).padStart(6, '0');
+      let code = randomSixDigitCode();
       let attempts = 0;
-      while (used.has(code) && attempts < 2000) {
+      while (used.has(code) && attempts < 5000) {
         code = randomSixDigitCode();
         attempts += 1;
       }
-      // Fallback extremo si hay colisiones inusuales.
       while (used.has(code)) {
-        code = randomSixDigitCode();
+        code = String((Number(code) + 1) % 1000000).padStart(6, '0');
       }
       used.add(code);
       update.run(code, row.id);
