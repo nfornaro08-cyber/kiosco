@@ -383,7 +383,7 @@ const app = {
             route.name === 'admin'
               ? ''
               : `<button type="button" class="cart-btn" data-action="open-cart" aria-label="Abrir mi pedido">
-                   <span aria-hidden="true"></span>
+                   <span aria-hidden="true">🛒</span>
                    <span class="cart-label">Mi pedido</span>
                    <span class="cart-count" data-cart-count>${this.cartCount()}</span>
                  </button>`
