@@ -28,9 +28,16 @@ function renderTimeline(order) {
 }
 
 function renderOrderCard(order) {
-  const delivered = order.status === 'entregado';
+  const statusClass =
+    order.status === 'entregado'
+      ? 'is-delivered'
+      : order.status === 'pendiente'
+        ? 'is-pending'
+        : order.status === 'cancelado'
+          ? 'is-cancelled'
+          : '';
   return `
-    <article class="order-card ${delivered ? 'is-delivered' : ''}" data-order-card="${order.id}" data-status="${escapeHtml(order.status)}">
+    <article class="order-card ${statusClass}" data-order-card="${order.id}" data-status="${escapeHtml(order.status)}">
       <header class="order-head">
         <div>
           <p class="order-code">Código: ${escapeHtml(order.code || ('#' + order.id))}</p>

@@ -1375,6 +1375,26 @@ body.is-auth .view {
   color: #166534;
 }
 
+.order-card.is-pending {
+  border-color: #f59e0b;
+  background: linear-gradient(180deg, #fffbeb 0%, #ffffff 38%);
+  box-shadow: 0 0 0 1px rgba(245, 158, 11, 0.18), var(--shadow-sm);
+}
+
+.order-card.is-pending .order-code {
+  color: #92400e;
+}
+
+.order-card.is-cancelled {
+  border-color: #ef4444;
+  background: linear-gradient(180deg, #fef2f2 0%, #ffffff 38%);
+  box-shadow: 0 0 0 1px rgba(239, 68, 68, 0.18), var(--shadow-sm);
+}
+
+.order-card.is-cancelled .order-code {
+  color: #991b1b;
+}
+
 .order-head {
   display: flex;
   align-items: flex-start;
