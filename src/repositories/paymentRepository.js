@@ -60,5 +60,10 @@ export function createPaymentRepository(db) {
       ).run(status, paymentMethod, now, id);
       return this.findById(id);
     },
+
+    reassignByOrder(fromOrderId, toOrderId) {
+      const now = new Date().toISOString();
+      db.prepare('UPDATE payments SET order_id = ?, updated_at = ? WHERE order_id = ?').run(toOrderId, now, fromOrderId);
+    },
   };
 }

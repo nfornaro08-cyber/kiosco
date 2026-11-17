@@ -67,6 +67,66 @@ export function createPaymentService({ db, config }) {
     };
   }
 
+  function mergeApprovedMpOrders(orderId) {
+    const tx = db.transaction(() => {
+      const order = orders.findById(orderId);
+      if (!order) return null;
+      if (order.paymentMethod !== 'mercadopago' || order.paymentStatus !== 'approved') return null;
+      if (!['pendiente', 'preparando', 'listo'].includes(order.status)) return null;
+
+      const target = orders.findMergeCandidate({
+        userId: order.userId,
+        recreoId: order.recreoId,
+        serviceDate: order.serviceDate,
+        paymentMethod: 'mercadopago',
+        paymentStatus: 'approved',
+        excludeId: order.id,
+      });
+      if (!target) return null;
+
+      // Unificar: sumar ítems del pedido actual al pedido aprobado existente.
+      for (const item of order.items || []) {
+        const existingItem = orders.getItem(target.id, item.productId);
+        if (existingItem) {
+          const newQty = existingItem.quantity + item.quantity;
+          orders.updateItem(existingItem.id, {
+            quantity: newQty,
+            subtotalCents: existingItem.unitPriceCents * newQty,
+          });
+        } else if (item.productId) {
+          orders.addItem(target.id, {
+            productId: item.productId,
+            productName: item.productName,
+            unitPriceCents: item.unitPriceCents,
+            quantity: item.quantity,
+            subtotalCents: item.subtotalCents,
+          });
+        } else {
+          // Ítem sin productId: agregar como línea nueva.
+          orders.addItem(target.id, {
+            productId: null,
+            productName: item.productName,
+            unitPriceCents: item.unitPriceCents,
+            quantity: item.quantity,
+            subtotalCents: item.subtotalCents,
+          });
+        }
+      }
+
+      const updatedTarget = orders.findById(target.id);
+      const total = (updatedTarget?.items || []).reduce((sum, it) => sum + (it.subtotalCents || 0), 0);
+      orders.updateTotals(target.id, total);
+      orders.appendNotes(target.id, order.notes);
+
+      // Mover pagos del pedido unificado al pedido destino y eliminar el duplicado.
+      payments.reassignByOrder(order.id, target.id);
+      orders.delete(order.id);
+      return orders.findById(target.id);
+    });
+
+    return tx.immediate();
+  }
+
   async function handleWebhook(payload) {
     if (!payload || !payload.data?.id) {
       return { ok: true, ignored: true };
@@ -112,6 +172,10 @@ export function createPaymentService({ db, config }) {
       });
 
       orders.updatePaymentStatus(payment.orderId, nextStatus);
+      if (nextStatus === 'approved') {
+        const merged = mergeApprovedMpOrders(payment.orderId);
+        if (merged) return { ok: true, mergedInto: merged.id };
+      }
 
       return { ok: true };
     }
@@ -151,6 +215,10 @@ export function createPaymentService({ db, config }) {
       });
 
       orders.updatePaymentStatus(payment.orderId, nextStatus);
+      if (nextStatus === 'approved') {
+        const merged = mergeApprovedMpOrders(payment.orderId);
+        if (merged) return { ok: true, mergedInto: merged.id };
+      }
 
       return { ok: true };
     }

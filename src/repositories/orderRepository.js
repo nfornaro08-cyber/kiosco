@@ -130,6 +130,80 @@ export function createOrderRepository(db) {
       return hydrate(orders);
     },
 
+    findMergeCandidate({ userId, recreoId, serviceDate, paymentMethod, paymentStatus = null, excludeId = null }) {
+      const where = [
+        'o.user_id = ?',
+        'o.recreo_id = ?',
+        'o.service_date = ?',
+        'o.payment_method = ?',
+        "o.status IN ('pendiente','preparando','listo')",
+      ];
+      const params = [userId, recreoId, serviceDate, paymentMethod];
+      if (paymentStatus) {
+        where.push('o.payment_status = ?');
+        params.push(paymentStatus);
+      }
+      if (excludeId) {
+        where.push('o.id != ?');
+        params.push(excludeId);
+      }
+      const order = map(
+        db
+          .prepare(`${BASE_SELECT} WHERE ${where.join(' AND ')} ORDER BY o.created_at DESC, o.id DESC LIMIT 1`)
+          .get(...params),
+      );
+      if (!order) return null;
+      hydrate([order]);
+      return order;
+    },
+
+    getItem(orderId, productId) {
+      const row = db
+        .prepare('SELECT * FROM order_items WHERE order_id = ? AND product_id = ? LIMIT 1')
+        .get(orderId, productId);
+      if (!row) return null;
+      return {
+        id: row.id,
+        productId: row.product_id,
+        productName: row.product_name,
+        unitPriceCents: row.unit_price_cents,
+        quantity: row.quantity,
+        subtotalCents: row.subtotal_cents,
+      };
+    },
+
+    updateItem(itemId, { quantity, subtotalCents }) {
+      db.prepare('UPDATE order_items SET quantity = ?, subtotal_cents = ? WHERE id = ?').run(
+        quantity,
+        subtotalCents,
+        itemId,
+      );
+    },
+
+    updateTotals(id, totalCents) {
+      const now = new Date().toISOString();
+      db.prepare('UPDATE orders SET total_cents = ?, updated_at = ? WHERE id = ?').run(totalCents, now, id);
+    },
+
+    appendNotes(id, notes) {
+      const clean = String(notes ?? '').trim();
+      if (!clean) return;
+      const row = db.prepare('SELECT notes FROM orders WHERE id = ?').get(id);
+      const current = String(row?.notes ?? '').trim();
+      if (!current) {
+        db.prepare('UPDATE orders SET notes = ?, updated_at = ? WHERE id = ?').run(clean, new Date().toISOString(), id);
+        return;
+      }
+      if (current.includes(clean)) return;
+      const merged = `${current}\n${clean}`.slice(0, 200);
+      db.prepare('UPDATE orders SET notes = ?, updated_at = ? WHERE id = ?').run(merged, new Date().toISOString(), id);
+    },
+
+    delete(id) {
+      db.prepare('DELETE FROM order_items WHERE order_id = ?').run(id);
+      db.prepare('DELETE FROM orders WHERE id = ?').run(id);
+    },
+
     updateStatus(id, status, { stockRestored } = {}) {
       const now = new Date().toISOString();
       if (stockRestored === undefined) {

@@ -102,6 +102,40 @@ export function createOrderService({ db, config }) {
         });
       }
 
+      // Unificación: si es efectivo y ya existe un pedido en efectivo para el mismo usuario/recreo/fecha, se unifican.
+      if (cleanPaymentMethod === 'cash') {
+        const mergeTarget = orders.findMergeCandidate({
+          userId,
+          recreoId: cleanRecreoId,
+          serviceDate,
+          paymentMethod: 'cash',
+        });
+
+        if (mergeTarget) {
+          for (const line of preparedLines) {
+            const reserved = products.decrementStock(line.productId, line.quantity);
+            if (!reserved) {
+              throw AppError.conflict('INSUFFICIENT_STOCK', `No hay stock suficiente de "${line.productName}".`);
+            }
+            const existingItem = orders.getItem(mergeTarget.id, line.productId);
+            if (existingItem) {
+              const newQty = existingItem.quantity + line.quantity;
+              orders.updateItem(existingItem.id, {
+                quantity: newQty,
+                subtotalCents: existingItem.unitPriceCents * newQty,
+              });
+            } else {
+              orders.addItem(mergeTarget.id, line);
+            }
+          }
+          const updated = orders.findById(mergeTarget.id);
+          const total = (updated?.items || []).reduce((sum, it) => sum + (it.subtotalCents || 0), 0);
+          orders.updateTotals(mergeTarget.id, total);
+          orders.appendNotes(mergeTarget.id, cleanNotes);
+          return orders.findById(mergeTarget.id);
+        }
+      }
+
       let orderId = null;
       for (let attempt = 0; attempt < 20 && orderId === null; attempt += 1) {
         const code = generateOrderCode();
@@ -192,12 +226,75 @@ export function createOrderService({ db, config }) {
     return transaction.immediate();
   }
 
+  function mergeApprovedMpOrders(orderId) {
+    const tx = db.transaction(() => {
+      const order = orders.findById(orderId);
+      if (!order) return null;
+      if (order.paymentMethod !== 'mercadopago' || order.paymentStatus !== 'approved') return null;
+      if (!['pendiente', 'preparando', 'listo'].includes(order.status)) return null;
+
+      const target = orders.findMergeCandidate({
+        userId: order.userId,
+        recreoId: order.recreoId,
+        serviceDate: order.serviceDate,
+        paymentMethod: 'mercadopago',
+        paymentStatus: 'approved',
+        excludeId: order.id,
+      });
+      if (!target) return null;
+
+      for (const item of order.items || []) {
+        const existingItem = orders.getItem(target.id, item.productId);
+        if (existingItem) {
+          const newQty = existingItem.quantity + item.quantity;
+          orders.updateItem(existingItem.id, {
+            quantity: newQty,
+            subtotalCents: existingItem.unitPriceCents * newQty,
+          });
+        } else if (item.productId) {
+          orders.addItem(target.id, {
+            productId: item.productId,
+            productName: item.productName,
+            unitPriceCents: item.unitPriceCents,
+            quantity: item.quantity,
+            subtotalCents: item.subtotalCents,
+          });
+        } else {
+          orders.addItem(target.id, {
+            productId: null,
+            productName: item.productName,
+            unitPriceCents: item.unitPriceCents,
+            quantity: item.quantity,
+            subtotalCents: item.subtotalCents,
+          });
+        }
+      }
+
+      const updatedTarget = orders.findById(target.id);
+      const total = (updatedTarget?.items || []).reduce((sum, it) => sum + (it.subtotalCents || 0), 0);
+      orders.updateTotals(target.id, total);
+      orders.appendNotes(target.id, order.notes);
+
+      const now = new Date().toISOString();
+      db.prepare('UPDATE payments SET order_id = ?, updated_at = ? WHERE order_id = ?').run(target.id, now, order.id);
+      orders.delete(order.id);
+      return orders.findById(target.id);
+    });
+
+    return tx.immediate();
+  }
+
   function updatePaymentStatus(orderId, paymentStatus) {
     const id = integer(orderId, 'orderId', { min: 1 });
     const status = oneOf(paymentStatus, 'paymentStatus', ['unpaid', 'pending', 'approved', 'rejected', 'cancelled', 'refunded']);
     const order = orders.findById(id);
     if (!order) throw AppError.notFound('ORDER_NOT_FOUND', 'El pedido no existe.');
-    return orders.updatePaymentStatus(id, status);
+    const updated = orders.updatePaymentStatus(id, status);
+    if (status === 'approved' && updated?.paymentMethod === 'mercadopago') {
+      const merged = mergeApprovedMpOrders(updated.id);
+      if (merged) return merged;
+    }
+    return updated;
   }
 
   function listAdmin({ status = null, recreoId = null, serviceDate = null, limit = 200 } = {}) {
