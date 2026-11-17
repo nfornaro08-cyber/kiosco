@@ -28,7 +28,6 @@ const TABS = [
   { id: 'recreos', label: 'Recreos', icon: '' },
   { id: 'categorias', label: 'Categorías', icon: '' },
   { id: 'usuarios', label: 'Usuarios', icon: '' },
-  { id: 'sql', label: 'SQL', icon: '' },
 ];
 
 const filters = {
@@ -127,7 +126,6 @@ async function paint(tab, main, app) {
   if (tab === 'pedidos') return paintPedidos(main, app);
   if (tab === 'recreos') return paintRecreos(main, app);
   if (tab === 'categorias') return paintCategorias(main, app);
-  if (tab === 'sql') return paintSql(main, app);
   return paintUsuarios(main, app);
 }
 
@@ -607,107 +605,6 @@ async function paintUsuarios(main, app) {
         </div>
       </div>
     `;
-  });
-}
-
-// ---------------------------------------------------------------------------
-// SQL (consultas en vivo sobre la base real del servidor)
-// ---------------------------------------------------------------------------
-async function paintSql(main) {
-  main.innerHTML = `
-    <header class="page-head">
-      <div>
-        <p class="eyebrow">Base de datos</p>
-        <h1>Consultas SQL</h1>
-        <p class="page-sub">Ejecuta consultas sobre la base real del servidor (en Railway, la del volume). Solo administradores.</p>
-      </div>
-      <div class="page-actions" style="display:flex;gap:8px;flex-wrap:wrap;">
-        <button type="button" class="btn btn-soft" data-sql-example="tables">Ver tablas</button>
-        <button type="button" class="btn btn-soft" data-sql-example="orders">Últimos pedidos</button>
-      </div>
-    </header>
-
-    <section class="panel">
-      <div class="field">
-        <label for="sql-input"><strong>Consulta SQL</strong></label>
-        <textarea id="sql-input" rows="8" spellcheck="false" style="width:100%;font-family:monospace;" placeholder="Ej: SELECT id, code, status, payment_status, total_cents FROM orders ORDER BY id DESC LIMIT 20;"></textarea>
-      </div>
-      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:10px;">
-        <button type="button" class="btn btn-primary" id="sql-run">Ejecutar consulta</button>
-        <span class="page-sub">Usá consultas con cuidado: INSERT/UPDATE/DELETE modifican la base real.</span>
-      </div>
-      <div id="sql-result" style="margin-top:16px;"></div>
-    </section>
-  `;
-
-  const input = main.querySelector('#sql-input');
-  const result = main.querySelector('#sql-result');
-  const runBtn = main.querySelector('#sql-run');
-
-  const examples = {
-    tables: "SELECT name, type FROM sqlite_master WHERE type IN ('table','view') AND name NOT LIKE 'sqlite_%' ORDER BY type, name;",
-    orders: "SELECT id, code, status, payment_status, payment_method, total_cents, service_date, created_at FROM orders ORDER BY created_at DESC LIMIT 30;",
-  };
-
-  main.querySelectorAll('[data-sql-example]').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      input.value = examples[btn.dataset.sqlExample] || '';
-      input.focus();
-    });
-  });
-
-  function renderResult(payload) {
-    if (!payload) {
-      result.innerHTML = '';
-      return;
-    }
-    if (payload.kind === 'run') {
-      result.innerHTML = `<div class="panel"><p><strong>Consulta ejecutada.</strong></p><p>Filas afectadas: ${payload.changes ?? 0}${payload.lastInsertRowid != null ? ` · lastInsertRowid: ${payload.lastInsertRowid}` : ''}</p></div>`;
-      return;
-    }
-    const rows = Array.isArray(payload.rows) ? payload.rows : [];
-    const cols = Array.isArray(payload.columns) ? payload.columns : (rows[0] ? Object.keys(rows[0]) : []);
-    if (!rows.length) {
-      result.innerHTML = `<div class="panel"><p><strong>0 filas.</strong> La consulta se ejecutó correctamente pero no devolvió resultados.</p></div>`;
-      return;
-    }
-    const head = cols.map((c) => `<th>${escapeHtml(String(c))}</th>`).join('');
-    const body = rows.map((row) => `<tr>${cols.map((c) => `<td>${escapeHtml(row[c] === null || row[c] === undefined ? '' : String(row[c]))}</td>`).join('')}</tr>`).join('');
-    result.innerHTML = `
-      <div class="panel">
-        <p><strong>${rows.length}</strong> fila(s)</p>
-        <div style="overflow:auto; max-height:60vh;">
-          <table class="data-table" style="min-width:100%;">
-            <thead><tr>${head}</tr></thead>
-            <tbody>${body}</tbody>
-          </table>
-        </div>
-      </div>`;
-  }
-
-  async function run() {
-    const sql = input.value.trim();
-    if (!sql) {
-      toast('Ingresá una consulta SQL.', 'error');
-      return;
-    }
-    setButtonLoading(runBtn, true, 'Ejecutando...');
-    try {
-      const payload = await api.admin.runSql(sql);
-      renderResult(payload);
-    } catch (error) {
-      result.innerHTML = `<div class="panel"><p style="color:#b91c1c;"><strong>Error SQL:</strong> ${escapeHtml(error?.message || 'No se pudo ejecutar la consulta.')}</p></div>`;
-    } finally {
-      setButtonLoading(runBtn, false);
-    }
-  }
-
-  runBtn.addEventListener('click', run);
-  input.addEventListener('keydown', (e) => {
-    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
-      e.preventDefault();
-      run();
-    }
   });
 }
 

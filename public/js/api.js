@@ -111,7 +111,5 @@ export const api = {
     getUsers: () => request('/admin/users'),
     createUser: (payload) => request('/admin/users', { method: 'POST', body: payload }),
     deleteUser: (id) => request(`/admin/users/${id}`, { method: 'DELETE' }),
-
-    runSql: (sql) => request('/admin/sql', { method: 'POST', body: { sql } }),
   },
 };

@@ -2,7 +2,7 @@ import { readJsonBody, sendJson } from '../../lib/http.js';
 import { requireAdmin } from '../guards.js';
 
 export function registerAdminRoutes(routes, ctx) {
-  const { products, categories, recreos, orders, auth, db } = ctx;
+  const { products, categories, recreos, orders, auth } = ctx;
 
   const admin = (req) => requireAdmin(ctx, req);
 
@@ -207,48 +207,6 @@ export function registerAdminRoutes(routes, ctx) {
       const session = admin(req);
       const result = auth.deleteAccount(params.id, { actorId: session.user.id });
       sendJson(res, 200, result);
-    },
-  });
-
-  // Ejecuta consultas SQL (solo admin). Conectado a la base real del servidor.
-  routes.push({
-    method: 'POST',
-    path: '/api/admin/sql',
-    handler: async (req, res) => {
-      admin(req);
-      const body = await readJsonBody(req);
-      const sql = typeof body?.sql === 'string' ? body.sql.trim() : '';
-      if (!sql) {
-        sendJson(res, 400, { error: { code: 'BAD_REQUEST', message: 'Ingresá una consulta SQL.' } });
-        return;
-      }
-
-      try {
-        const isRead = /^(SELECT|WITH|PRAGMA|EXPLAIN)\b/i.test(sql);
-        if (isRead) {
-          const rows = db.query(sql).all();
-          const columns = rows.length ? Object.keys(rows[0]) : [];
-          sendJson(res, 200, { kind: 'rows', columns, rows, count: rows.length });
-          return;
-        }
-
-        const result = db.run(sql);
-        sendJson(res, 200, {
-          kind: 'run',
-          changes: result?.changes ?? 0,
-          lastInsertRowid:
-            result?.lastInsertRowid === null || result?.lastInsertRowid === undefined
-              ? null
-              : Number(result.lastInsertRowid),
-        });
-      } catch (error) {
-        sendJson(res, 400, {
-          error: {
-            code: 'SQL_ERROR',
-            message: error?.message || 'Error al ejecutar la consulta SQL.',
-          },
-        });
-      }
     },
   });
 }

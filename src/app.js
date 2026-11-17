@@ -21,7 +21,6 @@ export function createApp({ dbPath = config.dbPath } = {}) {
 
   const ctx = {
     config,
-    db,
     auth: createAuthService({ db, config }),
     catalog: createCatalogService({ db }),
     products: createProductService({ db }),
